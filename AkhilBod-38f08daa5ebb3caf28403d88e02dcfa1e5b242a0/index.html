@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<link rel="icon" href="assets/robot.png" type="image/x-icon">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akhil Bodahanapati - Software Engineer</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <h1>My Portfolio</h1>
+        <ul>
+            <li><a href="#about">About</a></li>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="profile">
+                <img src="assets/avatar.jpeg" alt="AkhilBee" class="avatar">
+                <h1>Akhil Bodahanapati</h1>
+                <p class="job-title">Software Engineer</p>
+            </div>
+            <div class="contact-info">
+                <div class="contact-item">
+                    <img src="assets/mail.png" alt="Email Icon" class="contact-icon">
+                    <p>Email: akb198@pitt.edu</p>
+                </div>
+                <div class="contact-item">
+                    <img src="assets/phone.png" alt="Phone Icon" class="contact-icon">
+                    <p>Phone: +1 (747) 312-1646</p>
+                </div>
+                <div class="contact-item">
+                    <img src="assets/grad.png" alt="Graduation Icon" class="contact-icon">
+                    <p>Graduation: May 2027</p>
+                </div>
+                <div class="contact-item">
+                    <img src="assets/location.png" alt="Location Icon" class="contact-icon">
+                    <p>Location: Mars, Pennsylvania, USA</p>
+                </div>
+            </div>
+            <div class="social-links">
+                <a href="https://linkedin.com/in/akhil-b-929957311/">
+                    <img src="assets/linkedin-icon.webp" alt="LinkedIn" class="social-icon">
+                </a>
+                <a href="https://github.com/AkhilBod">
+                    <img src="assets/github-icon.png" alt="GitHub" class="social-icon">
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <section class="about-me" id="about">
+                <h2>About Me</h2>
+                <p>Hello! I’m Akhil Bodahanapati, a Software Engineer based in Pittsburgh, currently pursuing a double major in <strong>Computer Science</strong> and <strong>Data Science</strong> at the University of Pittsburgh.</p>
+                <p>I’ve had the opportunity to work as a Full Stack Developer at STAR Hospitals, Hyderabad’s largest healthcare provider, where I co-developed applications to enhance operational efficiency.</p>
+                <p><strong>Additionally, I led as a Chapter Leader for Steel City Codes, teaching Java fundamentals to over 200 students.</strong></p>
+                <p>In the summer of 2025, I’m looking for an internship where I can continue learning, growing, and making a meaningful impact.</p>
+            </section>
+
+            <section class="what-i-do" id="services">
+                <h2>What I'm Doing</h2>
+                <div class="cards">
+                    <div class="card">
+                        <div class="card-text">
+                            <img src="assets/fullstack-icon.png" alt="Full Stack Icon" class="card-icon">
+                            <h3>Full Stack Development</h3>
+                            <p>I build full-stack websites using Flask, Node.js, and React, ensuring smooth functionality and user experience.</p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-text">
+                            <img src="assets/data.png" alt="Data Icon" class="card-icon">
+                            <h3>Data Analysis</h3>
+                            <p>I apply data wrangling, visualization, and analysis techniques to extract insights and drive decisions.</p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-text">
+                            <img src="assets/robot.png" alt="ML Icon" class="card-icon">
+                            <h3>Machine Learning</h3>
+                            <p>Exploring various machine learning models like classification, regression, and clustering algorithms.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Projects Section -->
+            <section class="projects" id="projects">
+                <h2>Projects</h2>
+                <div class="project">
+                    <h3>Small Business Expansion App</h3>
+                    <p>Created an application using React.js, Node.js, and PostgreSQL, integrated with Mapbox API and Google Trends API for search data. Increased expansion success rate by 25%.</p>
+                    <a href="https://github.com/AkhilBod/Price2Produce.git" target="_blank">View Project</a>
+                </div>
+                <div class="project">
+                    <h3>Price2Produce - Grocery Pricing App</h3>
+                    <p>Developed a web application that helps users find the lowest prices for groceries nearby using web scraping and data aggregation techniques. Reduced user search time significantly.</p>
+                    <a href="https://github.com/AkhilBod/Price2Produce.git" target="_blank">View Project</a>
+                </div>
+                <div class="project">
+                    <h3>HReview</h3>
+                    <p>HReview streamlines large-scale performance evaluations by condensing up to 200 peer reviews into a single summary of key pros and cons using the Gemini API. This tool simplifies decision-making for management while ensuring reviewer anonymity.</p>
+                    <a href="https://github.com/T1G3RR/SteelHacks/tree/final" target="_blank">View Project</a>
+                </div>
+            </section>
+
+            <!-- Contact Section -->
+            <section id="contact">
+                <h2>Contact</h2>
+                <form class="contact-form" id="contact-form">
+                    <div class="form-group">
+                        <label for="name">Name:</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message:</label>
+                        <textarea id="message" name="message" rows="4" required></textarea>
+                    </div>
+                    <button type="submit">Send Message</button>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@2.6.4/dist/email.min.js"></script>
+    <script>
+        // Initialize EmailJS
+        (function(){
+            emailjs.init("C-QvuoeOHC9tJYRyD"); // Replace with your EmailJS user ID
+        })();
+
+        // Form submission handler
+        document.getElementById('contact-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            // Send email
+            emailjs.sendForm('service_e5n43ns', 'template_1d11ndq', this)
+                .then(function() {
+                    alert('Message sent successfully!');
+                }, function(error) {
+                    alert('Failed to send message. Please try again later.');
+                    console.error('EmailJS Error:', error);
+                });
+        });
+    </script>
+</body>
+</html>
