@@ -83,7 +83,7 @@ body {
 
 /* Sidebar */
 .sidebar {
-  width: 500px; /* Adjusted width to avoid being too skinny */
+  width: 700px; /* Adjusted width to avoid being too skinny */
   background-color: #1E1E1E;
   border-radius: 15px;
   padding: 20px;
