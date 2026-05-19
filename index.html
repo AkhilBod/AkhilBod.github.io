@@ -22,20 +22,63 @@
     <div class="cursor cursor-main"></div>
     <div class="cursor cursor-follower"></div>
 
-    <!-- TERMINAL INTRO -->
-    <div id="terminal-intro" class="terminal-intro-overlay">
-        <div class="intro-terminal">
-            <div class="intro-terminal-header">
-                <div class="terminal-buttons">
-                    <div class="button button-red"></div>
-                    <div class="button button-yellow"></div>
-                    <div class="button button-green"></div>
+    <!-- macOS Finder Intro -->
+    <div id="finder-intro" class="finder-intro-overlay" aria-label="Open portfolio desktop">
+        <button class="desktop-folder" id="akhil-folder" type="button" aria-label="Open akhil folder">
+            <img src="assets/images/macos-folder.png" alt="" class="folder-icon" aria-hidden="true">
+            <span class="folder-label">akhil/</span>
+        </button>
+
+        <section class="finder-window" id="finder-window" aria-label="akhil folder" hidden>
+            <div class="finder-toolbar">
+                <div class="finder-window-dots" aria-hidden="true">
+                    <span class="dot-red"></span>
+                    <span class="dot-yellow"></span>
+                    <span class="dot-green"></span>
                 </div>
-                <span class="intro-terminal-title">bash — ~/portfolio</span>
+                <div class="finder-window-title">akhil/</div>
             </div>
-            <div class="intro-body" id="intro-body"></div>
-        </div>
-        <p class="intro-skip-hint">press any key to skip</p>
+            <div class="finder-content">
+                <div class="finder-files" role="list">
+                    <button class="finder-file text-file" type="button" role="listitem" data-title="goals.txt" data-content="build useful things that scale.">
+                        <span class="file-icon file-text" aria-hidden="true">
+                            <span></span><span></span><span></span>
+                        </span>
+                        <span>goals.txt</span>
+                    </button>
+                    <button class="finder-file text-file" type="button" role="listitem" data-title="notes.txt" data-content="systems, product, people, outdoors.">
+                        <span class="file-icon file-text" aria-hidden="true">
+                            <span></span><span></span><span></span>
+                        </span>
+                        <span>notes.txt</span>
+                    </button>
+                    <button class="finder-file portfolio-file" id="portfolio-file" type="button" role="listitem" aria-label="Open portfolio">
+                        <span class="file-icon file-html portfolio-preview" aria-hidden="true">
+                            <span class="preview-nav"></span>
+                            <span class="preview-card"></span>
+                            <span class="preview-line preview-line-one"></span>
+                            <span class="preview-line preview-line-two"></span>
+                            <span class="preview-heading"></span>
+                        </span>
+                        <span>portfolio.html</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="finder-app-window" id="finder-app-window" aria-label="Text file preview" hidden>
+            <div class="finder-toolbar">
+                <div class="finder-window-dots" aria-hidden="true">
+                    <span class="dot-red"></span>
+                    <span class="dot-yellow"></span>
+                    <span class="dot-green"></span>
+                </div>
+                <div class="finder-window-title" id="app-window-title">goals.txt</div>
+            </div>
+            <p id="app-window-content">build useful things that scale.</p>
+        </section>
+
+        <p class="finder-hint" id="finder-hint">Double-click akhil/</p>
     </div>
 
     <!-- NAVBAR -->

@@ -1,107 +1,66 @@
-// ── TERMINAL INTRO (fast — like an elevator) ──────────────────────────────────
-(function initTerminalIntro() {
-    const overlay = document.getElementById('terminal-intro');
+// ── FINDER INTRO ─────────────────────────────────────────────────────────────
+(function initFinderIntro() {
+    const overlay = document.getElementById('finder-intro');
     if (!overlay) return;
 
-    // Only show on first visit
     if (localStorage.getItem('intro_seen')) {
         overlay.remove();
         return;
     }
-    localStorage.setItem('intro_seen', '1');
 
-    const introBody = document.getElementById('intro-body');
-    let skipped = false;
-
-    const sleep = (ms) => new Promise(r => setTimeout(r, skipped ? 0 : ms));
-
-    async function typeText(el, text, speed = 28) {
-        for (let i = 0; i < text.length; i++) {
-            if (skipped) { el.textContent = text; return; }
-            el.textContent = text.slice(0, i + 1);
-            await sleep(speed + Math.random() * 12);
-        }
-    }
-
-    async function addCommand(cmd) {
-        const line = document.createElement('div');
-        line.className = 'intro-prompt-line';
-        const sym = document.createElement('span');
-        sym.className = 'intro-prompt-sym';
-        sym.textContent = '$';
-        const txt = document.createElement('span');
-        txt.className = 'intro-cmd-text';
-        line.appendChild(sym);
-        line.appendChild(txt);
-        introBody.appendChild(line);
-        await typeText(txt, cmd, 28);
-        await sleep(180);
-    }
-
-    async function addOutput(text, cls = 'intro-output-line') {
-        const el = document.createElement('div');
-        el.className = cls;
-        el.textContent = text;
-        introBody.appendChild(el);
-        await sleep(100);
-    }
-
-    async function showProgressBar() {
-        const el = document.createElement('div');
-        el.className = 'intro-progress';
-        introBody.appendChild(el);
-        const total = 20;
-        for (let i = 0; i <= total; i++) {
-            if (skipped) { el.textContent = `[${'█'.repeat(total)}] 100%`; return; }
-            el.textContent = `[${'█'.repeat(i)}${'░'.repeat(total - i)}] ${Math.round(i / total * 100)}%`;
-            await sleep(55); // fills in ~1.1s
-        }
-    }
-
-    function blank() {
-        introBody.appendChild(document.createElement('br'));
-    }
+    const folder = document.getElementById('akhil-folder');
+    const finderWindow = document.getElementById('finder-window');
+    const portfolioFile = document.getElementById('portfolio-file');
+    const textFiles = document.querySelectorAll('.text-file');
+    const appWindow = document.getElementById('finder-app-window');
+    const appWindowTitle = document.getElementById('app-window-title');
+    const appWindowContent = document.getElementById('app-window-content');
+    const hint = document.getElementById('finder-hint');
 
     function exitIntro() {
+        localStorage.setItem('intro_seen', '1');
         overlay.classList.add('exit');
         overlay.addEventListener('transitionend', () => overlay.remove(), { once: true });
     }
 
-    async function run() {
-        await sleep(350);
-
-        const sys = document.createElement('div');
-        sys.className = 'intro-system-line';
-        sys.textContent = 'Last login: Sun Mar 15 2026 on ttys001';
-        introBody.appendChild(sys);
-        await sleep(300);
-        blank();
-
-        await addCommand('whoami');
-        await addOutput('akhil_bodahanapati');
-        await sleep(200);
-        blank();
-
-        await addCommand('./load_portfolio.sh');
-        await addOutput('Initializing...');
-        await sleep(200);
-        await showProgressBar();
-        await addOutput('✓ Ready.', 'intro-output-line intro-success');
-        await sleep(200);
-        blank();
-
-        await addCommand('open portfolio');
-        await addOutput('✓ Launching...', 'intro-output-line intro-success');
-        await sleep(700);
-
-        exitIntro();
+    function openFolder() {
+        folder.classList.add('open');
+        finderWindow.hidden = false;
+        requestAnimationFrame(() => {
+            finderWindow.classList.add('open');
+            finderWindow.querySelector('.finder-file')?.focus({ preventScroll: true });
+        });
+        if (hint) hint.textContent = 'Double-click a file';
     }
 
-    function skip() { skipped = true; exitIntro(); }
-    document.addEventListener('keydown', skip, { once: true });
-    overlay.addEventListener('click', skip, { once: true });
+    function openTextFile(file) {
+        appWindowTitle.textContent = file.dataset.title || 'notes.txt';
+        appWindowContent.textContent = file.dataset.content || '';
+        appWindow.hidden = false;
+        requestAnimationFrame(() => appWindow.classList.add('open'));
+    }
 
-    run();
+    folder.addEventListener('dblclick', openFolder);
+    portfolioFile.addEventListener('dblclick', exitIntro);
+    textFiles.forEach(file => {
+        file.addEventListener('dblclick', () => openTextFile(file));
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (!document.body.contains(overlay)) return;
+        if (event.key === 'Escape') {
+            exitIntro();
+        }
+        if (event.key === 'Enter' && document.activeElement === folder) {
+            openFolder();
+        }
+        if (event.key === 'Enter' && document.activeElement?.classList.contains('text-file')) {
+            openTextFile(document.activeElement);
+        }
+        if (event.key === 'Enter' && document.activeElement === portfolioFile) {
+            exitIntro();
+        }
+    });
 })();
 
 // ── CUSTOM CURSOR (desktop/mouse only) ────────────────────────────────────────
