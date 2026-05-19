@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akhil Bodahanapati</title>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,900;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
+    <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8PGT98XQTN"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-8PGT98XQTN');
+    </script>
+</head>
+<body>
+    <div class="cursor cursor-main"></div>
+    <div class="cursor cursor-follower"></div>
+
+    <!-- TERMINAL INTRO -->
+    <div id="terminal-intro" class="terminal-intro-overlay">
+        <div class="intro-terminal">
+            <div class="intro-terminal-header">
+                <div class="terminal-buttons">
+                    <div class="button button-red"></div>
+                    <div class="button button-yellow"></div>
+                    <div class="button button-green"></div>
+                </div>
+                <span class="intro-terminal-title">bash — ~/portfolio</span>
+            </div>
+            <div class="intro-body" id="intro-body"></div>
+        </div>
+        <p class="intro-skip-hint">press any key to skip</p>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="logo">AB</div>
+        <div class="nav-links">
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#experience">Experience</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#skills">Skills</a></li>
+            </ul>
+        </div>
+        <div class="burger">
+            <div class="line1"></div>
+            <div class="line2"></div>
+            <div class="line3"></div>
+        </div>
+    </nav>
+
+    <div class="layout">
+
+        <!-- SIDEBAR CARD -->
+        <aside class="sidebar-card">
+            <div class="sc-photo-wrap">
+                <img src="assets/images/pfp.jpeg" alt="Akhil Bodahanapati" class="sc-photo">
+            </div>
+            <h2 class="sc-name">Akhil Bodahanapati</h2>
+            <p class="sc-bio">Software engineer focused on backend systems, thoughtful product building, and clean execution.</p>
+            <div class="sc-socials">
+                <a href="https://github.com/AkhilBod" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
+                <a href="https://linkedin.com/in/akhil-bod" target="_blank" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                <a href="mailto:akkiisan9@gmail.com" title="Email"><i class="fas fa-envelope"></i></a>
+            </div>
+            <a href="assets/docs/Akhil_MAR_25.pdf" class="sc-resume" download>
+                <i class="fas fa-download"></i> Resume
+            </a>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+
+            <!-- HERO -->
+            <section id="home" class="hero-section">
+                <span class="hero-label">ABOUT ME</span>
+                <p class="hero-desc">
+                    My name is Akhil, and I love building. I'm especially drawn to systems at scale, high-performance computing, and the idea that thoughtful engineering can positively shape the experience of millions of people. I want to work at the intersection of creativity, usefulness, and engineering to build products that people genuinely rely on and benefit from at scale. Outside of building, I love being outdoors, backpacking, traveling, and meeting new people.
+                </p>
+            </section>
+
+            <!-- EXPERIENCE -->
+            <section id="experience" class="section-block" data-aos="fade-up">
+                <div class="section-heading">
+                    <div class="section-title">EXPERIENCE</div>
+                </div>
+
+                <div class="experience-list">
+                    <div class="exp-row" data-aos="fade-up">
+                        <img src="assets/images/nutanix-logo.png" alt="Nutanix logo" class="exp-logo">
+                        <div class="exp-body">
+                            <h3>Nutanix</h3>
+                            <p class="exp-role">Software Engineer Intern</p>
+                            <span class="exp-date">May 2026 – Aug 2026</span>
+                        </div>
+                    </div>
+
+                    <div class="exp-row" data-aos="fade-up">
+                        <img src="assets/images/nail-lab-logo.png" alt="NAIL Lab logo" class="exp-logo">
+                        <div class="exp-body">
+                            <h3>NAIL Lab</h3>
+                            <p class="exp-role">Software Engineer Intern</p>
+                            <span class="exp-date">December 2025 – April 2026</span>
+                        </div>
+                    </div>
+
+                    <div class="exp-row" data-aos="fade-up">
+                        <img src="assets/images/federated-hermes-logo.png" alt="Federated Hermes logo" class="exp-logo">
+                        <div class="exp-body">
+                            <h3>Federated Hermes</h3>
+                            <p class="exp-role">Software Engineer Intern</p>
+                            <span class="exp-date">May 2025 – Aug 2025</span>
+                        </div>
+                    </div>
+
+                    <div class="exp-row" data-aos="fade-up">
+                        <img src="assets/images/star-hospitals-logo.svg" alt="Star Hospitals logo" class="exp-logo">
+                        <div class="exp-body">
+                            <h3>Star Hospitals</h3>
+                            <p class="exp-role">Software Engineer Intern</p>
+                            <span class="exp-date">August 2024 – Present</span>
+                            <span class="exp-location">Los Angeles, CA</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PROJECTS -->
+            <section id="projects" class="section-block" data-aos="fade-up">
+                <div class="section-heading">
+                    <div class="section-title">PROJECTS</div>
+                </div>
+
+                <div class="proj-cards">
+
+                    <!-- InterviewSense — featured -->
+                    <a href="interviewsense.html" class="proj-card proj-card-wide" data-aos="fade-up">
+                        <div class="proj-media proj-media-featured" data-autoplay-video data-playback-rate="2">
+                            <iframe src="https://player.vimeo.com/video/1171183131?api=1&background=0&autoplay=0&loop=1&muted=1&controls=0&title=0&byline=0&portrait=0&autopause=0&dnt=1&playsinline=1" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+                            <div class="proj-media-overlay"></div>
+                            <div class="proj-external-icon">
+                                <svg width="13" height="13" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 14L14 4M14 4H6M14 4V12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </div>
+                        </div>
+                        <div class="proj-card-body">
+                            <div class="proj-card-tag">12K+ USERS</div>
+                            <h3>InterviewSense</h3>
+                            <p>AI interview prep platform · Python, FastAPI, PostgreSQL, Redis</p>
+                        </div>
+                    </a>
+
+                    <!-- Quantitative Investment Engine -->
+                    <a href="quant-engine.html" class="proj-card" data-aos="fade-up">
+                        <div class="proj-media ph-quant">
+                            <div class="ph-pattern"></div>
+                            <div class="proj-media-overlay"></div>
+                            <div class="ph-stats ph-stats-lime">
+                                <span>1ST PLACE</span>
+                                <span class="ph-divider">·</span>
+                                <span>$75K SAVINGS</span>
+                            </div>
+                            <div class="proj-external-icon">
+                                <svg width="13" height="13" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 14L14 4M14 4H6M14 4V12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </div>
+                        </div>
+                        <div class="proj-card-body">
+                            <div class="proj-card-tag">FEDERATED HERMES · 1ST PLACE</div>
+                            <h3>Quantitative Investment Engine</h3>
+                            <p>$75K annual savings · selected for Q3 2025 production · Python, PySpark, Databricks</p>
+                        </div>
+                    </a>
+
+                    <!-- Orbit -->
+                    <a href="orbit.html" class="proj-card" data-aos="fade-up">
+                        <div class="proj-media ph-orbit">
+                            <div class="ph-pattern"></div>
+                            <div class="proj-media-overlay"></div>
+                            <div class="ph-stats ph-stats-purple">
+                                <span>500K+</span>
+                                <span class="ph-divider">·</span>
+                                <span>RECORDS</span>
+                            </div>
+                            <div class="proj-external-icon">
+                                <svg width="13" height="13" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 14L14 4M14 4H6M14 4V12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </div>
+                        </div>
+                        <div class="proj-card-body">
+                            <div class="proj-card-tag">CMU TARTANHACKS · MOST SIGNIFICANT INNOVATION</div>
+                            <h3>Orbit</h3>
+                            <p>700+ participants · distributed vector search over 500K+ records</p>
+                        </div>
+                    </a>
+
+                    <!-- Foresight -->
+                    <a href="foresight.html" class="proj-card" data-aos="fade-up">
+                        <div class="proj-media ph-foresight">
+                            <div class="ph-pattern"></div>
+                            <div class="proj-media-overlay"></div>
+                            <div class="ph-stats ph-stats-gold">
+                                <span>TOP 5%</span>
+                                <span class="ph-divider">·</span>
+                                <span>TREEHACKS</span>
+                            </div>
+                            <div class="proj-external-icon">
+                                <svg width="13" height="13" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 14L14 4M14 4H6M14 4V12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </div>
+                        </div>
+                        <div class="proj-card-body">
+                            <div class="proj-card-tag">TREEHACKS (STANFORD) · TOP 5%</div>
+                            <h3>Foresight</h3>
+                            <p>AI vision detects household items and autonomously reorders on Amazon</p>
+                        </div>
+                    </a>
+
+                    <!-- Price2Produce -->
+                    <a href="price2produce.html" class="proj-card" data-aos="fade-up">
+                        <div class="proj-media ph-price2produce">
+                            <div class="ph-pattern"></div>
+                            <div class="proj-media-overlay"></div>
+                            <div class="ph-stats ph-stats-green">
+                                <span>50+</span>
+                                <span class="ph-divider">·</span>
+                                <span>RETAILERS</span>
+                            </div>
+                            <div class="proj-external-icon">
+                                <svg width="13" height="13" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 14L14 4M14 4H6M14 4V12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </div>
+                        </div>
+                        <div class="proj-card-body">
+                            <div class="proj-card-tag">120+ WEEKLY USERS</div>
+                            <h3>Price2Produce</h3>
+                            <p>Produce price aggregator · 50+ retailers scraped in under 60s</p>
+                        </div>
+                    </a>
+
+                </div>
+            </section>
+
+            <!-- SKILLS / TOOLS -->
+            <section id="skills" class="section-block" data-aos="fade-up">
+                <div class="section-heading">
+                    <div class="section-title">SKILLS</div>
+                </div>
+
+                <div class="skills-simple">
+                    <p><span>Languages</span> Python, Java, C++, TypeScript, SQL</p>
+                    <p><span>Backend</span> FastAPI, Flask, Spring Boot, REST APIs</p>
+                    <p><span>Data</span> PostgreSQL, Redis, Databricks, PySpark, Pandas, FAISS</p>
+                    <p><span>Infra</span> AWS, Docker, Kubernetes, GitHub Actions, Linux</p>
+                    <p><span>Interests</span> Distributed systems, backend architecture, developer tooling</p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <footer>
+        <div class="footer-inner">
+            <p>&copy; 2025 Akhil Bodahanapati</p>
+            <div class="social-links">
+                <a href="https://github.com/AkhilBod" target="_blank"><i class="fab fa-github"></i></a>
+                <a href="https://linkedin.com/in/akhil-bod" target="_blank"><i class="fab fa-linkedin"></i></a>
+                <a href="mailto:akkiisan9@gmail.com"><i class="fas fa-envelope"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

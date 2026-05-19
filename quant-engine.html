@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantitative Investment Engine — Akhil Bodahanapati</title>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,900;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8PGT98XQTN"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-8PGT98XQTN');
+    </script>
+    <style>
+        .qe-page {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: calc(var(--nav-h) + 4rem) 2rem 5rem;
+        }
+
+        .qe-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.76rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: var(--transition);
+            margin-bottom: 3rem;
+        }
+
+        .qe-back:hover {
+            color: var(--primary);
+            gap: 0.75rem;
+        }
+
+        .qe-back i { font-size: 0.7rem; }
+
+        .qe-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: var(--primary);
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .qe-label::before {
+            content: '';
+            display: inline-block;
+            width: 24px; height: 1.5px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        .qe-title {
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 900;
+            letter-spacing: -2px;
+            color: var(--text);
+            line-height: 1.05;
+            margin-bottom: 2.5rem;
+        }
+
+        .qe-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 3.5rem;
+        }
+
+        .qe-metric {
+            background: #111;
+            padding: 1.75rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .qe-metric-num {
+            font-size: 2.4rem;
+            font-weight: 900;
+            letter-spacing: -2px;
+            color: var(--primary);
+            line-height: 1;
+        }
+
+        .qe-metric-label {
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            line-height: 1.5;
+        }
+
+        .qe-body {
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        .qe-section h2 {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .qe-section p {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.85;
+            font-weight: 300;
+        }
+
+        .qe-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .qe-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.35rem 0.8rem;
+            background: rgba(197,255,65,0.07);
+            border: 1px solid rgba(197,255,65,0.15);
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.75);
+            letter-spacing: 0.3px;
+        }
+
+        .qe-tag i { color: var(--primary); font-size: 0.75rem; }
+
+        .qe-highlights {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .qe-highlight-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1.1rem 1.3rem;
+            background: #111;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+
+        .qe-highlight-item i {
+            color: var(--primary);
+            font-size: 0.9rem;
+            margin-top: 0.15rem;
+            flex-shrink: 0;
+        }
+
+        .qe-highlight-item p {
+            font-size: 0.86rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        @media (max-width: 640px) {
+            .qe-metrics { grid-template-columns: 1fr; }
+            .qe-page { padding: calc(var(--nav-h) + 2rem) 1.25rem 4rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="cursor cursor-main"></div>
+    <div class="cursor cursor-follower"></div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="logo">AB</div>
+        <div class="nav-links">
+            <ul>
+                <li><a href="index.html#home">Home</a></li>
+                <li><a href="index.html#experience">Experience</a></li>
+                <li><a href="index.html#projects">Projects</a></li>
+                <li><a href="index.html#skills">Skills</a></li>
+            </ul>
+        </div>
+        <div class="burger">
+            <div class="line1"></div>
+            <div class="line2"></div>
+            <div class="line3"></div>
+        </div>
+    </nav>
+
+    <div class="qe-page">
+
+        <a href="index.html#projects" class="qe-back">
+            <i class="fas fa-arrow-left"></i> Back to Projects
+        </a>
+
+        <div class="qe-label">Federated Hermes · 1st Place</div>
+        <h1 class="qe-title">Quantitative<br>Investment Engine</h1>
+
+        <div class="qe-body">
+
+            <div class="qe-section">
+                <h2>Overview</h2>
+                <p>
+                    Built during my internship at Federated Hermes, this project won 1st place in an internal innovation competition and was selected for production consideration. It streamlined part of the investment workflow by automating quantitative signal generation and portfolio rebalancing logic.
+                </p>
+            </div>
+
+            <div class="qe-section">
+                <h2>Recognition</h2>
+                <p>Projected to save roughly $75K annually by reducing manual analyst effort and making the workflow faster, more reliable, and easier to scale across portfolio teams.</p>
+            </div>
+
+            <div class="qe-section">
+                <h2>Built with</h2>
+                <p>Python, PySpark, Databricks, Delta Lake, SQL, AWS S3</p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <footer>
+        <div class="footer-inner">
+            <p>&copy; 2025 Akhil Bodahanapati</p>
+            <div class="social-links">
+                <a href="https://github.com/AkhilBod" target="_blank"><i class="fab fa-github"></i></a>
+                <a href="https://linkedin.com/in/akhil-bod" target="_blank"><i class="fab fa-linkedin"></i></a>
+                <a href="mailto:akkiisan9@gmail.com"><i class="fas fa-envelope"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+</body>
+</html>

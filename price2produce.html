@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Price2Produce — Akhil Bodahanapati</title>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,900;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8PGT98XQTN"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-8PGT98XQTN');
+    </script>
+    <style>
+        .proj-page { max-width: 800px; margin: 0 auto; padding: calc(var(--nav-h) + 4rem) 2rem 5rem; }
+        .proj-back { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--text-muted); text-decoration: none; font-size: 0.76rem; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; transition: var(--transition); margin-bottom: 3rem; }
+        .proj-back:hover { color: var(--primary); gap: 0.75rem; }
+        .proj-back i { font-size: 0.7rem; }
+        .proj-pg-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 3px; color: #86efac; text-transform: uppercase; display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.25rem; }
+        .proj-pg-label::before { content: ''; display: inline-block; width: 24px; height: 1.5px; background: #86efac; border-radius: 2px; }
+        .proj-pg-title { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 900; letter-spacing: -2px; color: var(--text); line-height: 1.05; margin-bottom: 2.5rem; }
+        .proj-pg-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 3.5rem; }
+        .proj-pg-metric { background: #111; padding: 1.75rem 1.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
+        .proj-pg-metric-num { font-size: 2.4rem; font-weight: 900; letter-spacing: -2px; color: #86efac; line-height: 1; }
+        .proj-pg-metric-label { font-size: 0.62rem; font-weight: 700; letter-spacing: 1.5px; color: var(--text-muted); text-transform: uppercase; line-height: 1.5; }
+        .proj-pg-body { display: flex; flex-direction: column; gap: 2.5rem; }
+        .proj-pg-section h2 { font-size: 0.7rem; font-weight: 700; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); }
+        .proj-pg-section p { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.85; font-weight: 300; }
+        .proj-pg-stack { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .proj-pg-tag { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.8rem; background: rgba(134,239,172,0.07); border: 1px solid rgba(134,239,172,0.15); border-radius: 6px; font-size: 0.72rem; font-weight: 600; color: rgba(255,255,255,0.75); letter-spacing: 0.3px; }
+        .proj-pg-tag i { color: #86efac; font-size: 0.75rem; }
+        .proj-pg-highlights { display: flex; flex-direction: column; gap: 0.75rem; }
+        .proj-pg-highlight { display: flex; align-items: flex-start; gap: 1rem; padding: 1.1rem 1.3rem; background: #111; border: 1px solid var(--border); border-radius: 10px; }
+        .proj-pg-highlight i { color: #86efac; font-size: 0.9rem; margin-top: 0.15rem; flex-shrink: 0; }
+        .proj-pg-highlight p { font-size: 0.86rem; color: var(--text-secondary); line-height: 1.7; margin: 0; }
+        .proj-pg-links { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+        .proj-pg-link { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.2rem; border: 1px solid var(--border); border-radius: 8px; font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); text-decoration: none; transition: var(--transition); }
+        .proj-pg-link:hover { border-color: rgba(134,239,172,0.3); color: var(--text); }
+        .proj-pg-link.primary { background: #86efac; border-color: #86efac; color: #000; }
+        .proj-pg-link.primary:hover { background: #bbf7d0; }
+        .proj-pg-video { position: relative; padding-top: 56.25%; border-radius: 12px; overflow: hidden; margin-bottom: 3.5rem; border: 1px solid var(--border); }
+        .proj-pg-video iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        @media (max-width: 640px) { .proj-pg-metrics { grid-template-columns: 1fr; } .proj-page { padding: calc(var(--nav-h) + 2rem) 1.25rem 4rem; } }
+    </style>
+</head>
+<body>
+    <div class="cursor cursor-main"></div>
+    <div class="cursor cursor-follower"></div>
+
+    <nav class="navbar">
+        <div class="logo">AB</div>
+        <div class="nav-links">
+            <ul>
+                <li><a href="index.html#home">Home</a></li>
+                <li><a href="index.html#experience">Experience</a></li>
+                <li><a href="index.html#projects">Projects</a></li>
+                <li><a href="index.html#skills">Skills</a></li>
+            </ul>
+        </div>
+        <div class="burger"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div>
+    </nav>
+
+    <div class="proj-page">
+
+        <a href="index.html#projects" class="proj-back"><i class="fas fa-arrow-left"></i> Back to Projects</a>
+
+        <div class="proj-pg-label">Web Scraping · Python · 120+ Weekly Users</div>
+        <h1 class="proj-pg-title">Price2Produce</h1>
+
+        <div class="proj-pg-video" data-autoplay-video data-playback-rate="2">
+            <iframe src="https://player.vimeo.com/video/1180360017?api=1&background=0&autoplay=0&loop=1&muted=1&controls=0&title=0&byline=0&portrait=0&autopause=0&dnt=1&playsinline=1" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+        </div>
+
+        <div class="proj-pg-body">
+
+            <div class="proj-pg-section">
+                <h2>Overview</h2>
+                <p>Price2Produce is a produce price comparison tool built to make grocery shopping a little easier and more transparent. It pulls pricing across 50+ retailers and surfaces cheaper options quickly enough to be useful while someone is actually planning a grocery run.</p>
+            </div>
+
+            <div class="proj-pg-section">
+                <h2>Traction</h2>
+                <p>Reached 120+ weekly users through a practical use case: helping students and families compare produce prices without manually checking every grocery site.</p>
+            </div>
+
+            <div class="proj-pg-section">
+                <h2>Built with</h2>
+                <p>Python, BeautifulSoup, asyncio, Playwright, FastAPI, React</p>
+            </div>
+
+            <div class="proj-pg-section">
+                <h2>Links</h2>
+                <div class="proj-pg-links">
+                    <a href="https://github.com/AkhilBod/Price2Produce" target="_blank" class="proj-pg-link primary"><i class="fab fa-github"></i> GitHub Repo</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-inner">
+            <p>&copy; 2025 Akhil Bodahanapati</p>
+            <div class="social-links">
+                <a href="https://github.com/AkhilBod" target="_blank"><i class="fab fa-github"></i></a>
+                <a href="https://linkedin.com/in/akhil-bod" target="_blank"><i class="fab fa-linkedin"></i></a>
+                <a href="mailto:akkiisan9@gmail.com"><i class="fas fa-envelope"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+</body>
+</html>
