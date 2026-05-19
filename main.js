@@ -3,7 +3,9 @@
     const overlay = document.getElementById('finder-intro');
     if (!overlay) return;
 
-    if (localStorage.getItem('intro_seen')) {
+    const isPreview = new URLSearchParams(window.location.search).get('preview') === '1';
+
+    if (isPreview || localStorage.getItem('intro_seen')) {
         overlay.remove();
         return;
     }
@@ -12,12 +14,9 @@
     const finderWindow = document.getElementById('finder-window');
     const portfolioFile = document.getElementById('portfolio-file');
     const textFiles = document.querySelectorAll('.text-file');
-    const appWindow = document.getElementById('finder-app-window');
-    const appWindowTitle = document.getElementById('app-window-title');
-    const appWindowContent = document.getElementById('app-window-content');
     const portfolioLaunchWindow = document.getElementById('portfolio-launch-window');
     const hint = document.getElementById('finder-hint');
-    let portfolioLaunchTimer;
+    let windowOffset = 0;
 
     function exitIntro() {
         localStorage.setItem('intro_seen', '1');
@@ -29,7 +28,6 @@
         folder.classList.add('open');
         finderWindow.hidden = false;
         requestAnimationFrame(() => {
-            finderWindow.classList.remove('minimized');
             finderWindow.classList.add('open');
             finderWindow.querySelector('.finder-file')?.focus({ preventScroll: true });
         });
@@ -37,40 +35,56 @@
     }
 
     function openTextFile(file) {
-        appWindowTitle.textContent = file.dataset.title || 'about_akhil.txt';
-        appWindowContent.textContent = file.dataset.content || '';
-        appWindow.hidden = false;
-        requestAnimationFrame(() => {
-            appWindow.classList.remove('minimized');
-            appWindow.classList.add('open');
-        });
+        const win = document.createElement('section');
+        const title = file.dataset.title || 'about_akhil.txt';
+        win.className = 'finder-app-window text-preview-window';
+        win.setAttribute('aria-label', title);
+        win.hidden = true;
+        win.style.top = `${28 + windowOffset}vh`;
+        win.style.left = `${50 + windowOffset * 0.5}%`;
+        win.innerHTML = `
+            <div class="finder-toolbar" data-drag-handle>
+                <div class="finder-window-dots">
+                    <button class="dot-red" type="button" aria-label="Close window" data-window-action="close"></button>
+                    <button class="dot-yellow" type="button" aria-label="Close window" data-window-action="close"></button>
+                    <button class="dot-green" type="button" aria-label="Zoom window" data-window-action="zoom"></button>
+                </div>
+                <div class="finder-window-title"></div>
+            </div>
+            <p></p>
+        `;
+        win.querySelector('.finder-window-title').textContent = title;
+        win.querySelector('p').textContent = file.dataset.content || '';
+        overlay.appendChild(win);
+        wireWindow(win);
+        windowOffset = (windowOffset + 3) % 12;
+        win.hidden = false;
+        requestAnimationFrame(() => win.classList.add('open'));
     }
 
     function openPortfolioFile() {
-        clearTimeout(portfolioLaunchTimer);
         portfolioLaunchWindow.hidden = false;
         requestAnimationFrame(() => {
-            portfolioLaunchWindow.classList.remove('minimized');
             portfolioLaunchWindow.classList.add('open');
         });
-        if (hint) hint.textContent = 'Launching portfolio.html';
-        portfolioLaunchTimer = setTimeout(exitIntro, 950);
+        if (hint) hint.textContent = 'Press green to open full portfolio';
     }
 
     function closeWindow(win) {
-        if (win === portfolioLaunchWindow) clearTimeout(portfolioLaunchTimer);
-        win.classList.remove('open', 'minimized', 'zoomed');
+        win.classList.remove('open', 'zoomed');
         if (win === finderWindow) {
             folder.classList.remove('open');
             if (hint) hint.textContent = 'Double-click akhil/';
         }
         setTimeout(() => {
-            if (!win.classList.contains('open')) win.hidden = true;
+            if (!win.classList.contains('open')) {
+                if (win.classList.contains('text-preview-window')) {
+                    win.remove();
+                } else {
+                    win.hidden = true;
+                }
+            }
         }, 180);
-    }
-
-    function minimizeWindow(win) {
-        win.classList.add('minimized');
     }
 
     function zoomWindow(win) {
@@ -114,18 +128,20 @@
         file.addEventListener('dblclick', () => openTextFile(file));
     });
 
-    [finderWindow, appWindow, portfolioLaunchWindow].forEach(win => {
+    function wireWindow(win) {
         makeWindowDraggable(win);
         win.querySelectorAll('[data-window-action]').forEach(control => {
             control.addEventListener('click', (event) => {
                 event.stopPropagation();
                 const action = control.dataset.windowAction;
                 if (action === 'close') closeWindow(win);
-                if (action === 'minimize') minimizeWindow(win);
                 if (action === 'zoom') zoomWindow(win);
+                if (action === 'open-full') exitIntro();
             });
         });
-    });
+    }
+
+    [finderWindow, portfolioLaunchWindow].forEach(wireWindow);
 
     document.addEventListener('keydown', (event) => {
         if (!document.body.contains(overlay)) return;

@@ -52,7 +52,24 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', sans-serif;
     background: #070707;
     overflow: hidden;
+    cursor: default;
     transition: transform 0.75s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.6s ease;
+}
+
+.finder-intro-overlay * {
+    cursor: inherit;
+}
+
+.finder-intro-overlay button,
+.finder-intro-overlay iframe {
+    cursor: default;
+}
+
+.finder-intro-overlay ~ .cursor-main,
+.finder-intro-overlay ~ .cursor-follower,
+body:has(.finder-intro-overlay) .cursor-main,
+body:has(.finder-intro-overlay) .cursor-follower {
+    display: none !important;
 }
 
 .finder-intro-overlay::before {
@@ -146,13 +163,6 @@ body {
     transition: none;
 }
 
-.finder-window.minimized,
-.finder-app-window.minimized {
-    opacity: 0;
-    transform: translate(-50%, 34px) scale(0.88);
-    pointer-events: none;
-}
-
 .finder-window.zoomed,
 .finder-app-window.zoomed {
     top: 52vh !important;
@@ -195,11 +205,79 @@ body {
     border: 0;
     padding: 0;
     cursor: pointer;
+    position: relative;
+    box-shadow: 0 0 0 0 rgba(255,255,255,0);
+    transition: box-shadow 0.16s ease, filter 0.16s ease;
 }
 
 .dot-red { background: #ff5f57; }
 .dot-yellow { background: #febc2e; }
 .dot-green { background: #28c840; }
+
+.finder-window-dots button:hover,
+.finder-window-dots button:focus-visible {
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.78);
+    outline: none;
+    filter: brightness(1.08);
+}
+
+.dot-red::before,
+.dot-red::after {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 5px;
+    width: 6px;
+    height: 1.4px;
+    border-radius: 999px;
+    background: rgba(92,18,16,0.72);
+    opacity: 0;
+}
+
+.dot-red::before { transform: rotate(45deg); }
+.dot-red::after { transform: rotate(-45deg); }
+
+.dot-yellow::before {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 5px;
+    width: 6px;
+    height: 1.4px;
+    border-radius: 999px;
+    background: rgba(91,55,0,0.72);
+    opacity: 0;
+}
+
+.dot-green::before,
+.dot-green::after {
+    content: '';
+    position: absolute;
+    width: 5px;
+    height: 1.4px;
+    border-radius: 999px;
+    background: rgba(12,75,24,0.78);
+    opacity: 0;
+}
+
+.dot-green::before {
+    left: 2.8px;
+    top: 4px;
+    transform: rotate(-45deg);
+}
+
+.dot-green::after {
+    right: 2.8px;
+    bottom: 4px;
+    transform: rotate(-45deg);
+}
+
+.finder-window-dots:hover button::before,
+.finder-window-dots:hover button::after,
+.finder-window-dots button:focus-visible::before,
+.finder-window-dots button:focus-visible::after {
+    opacity: 1;
+}
 
 .finder-window-title {
     color: rgba(255,255,255,0.78);
@@ -391,82 +469,16 @@ body {
 }
 
 .portfolio-launch-window {
-    width: min(620px, calc(100vw - 34px));
+    width: min(980px, calc(100vw - 34px));
+    top: 10vh;
 }
 
-.portfolio-launch-preview {
-    position: relative;
-    height: 320px;
-    overflow: hidden;
-    background: #080808;
-}
-
-.portfolio-launch-nav {
-    height: 32px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    background: #030303;
-}
-
-.portfolio-launch-card {
-    position: absolute;
-    left: 54px;
-    top: 76px;
-    width: 102px;
-    height: 146px;
-    border-radius: 10px;
-    background: #151515;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
-}
-
-.portfolio-launch-card::before {
-    content: '';
-    position: absolute;
-    left: 28px;
-    top: 24px;
-    width: 46px;
-    height: 46px;
-    border-radius: 6px;
-    background: url('assets/images/pfp.jpeg') center / cover;
-}
-
-.portfolio-launch-copy {
-    position: absolute;
-    left: 224px;
-    top: 88px;
-    width: 300px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.portfolio-launch-copy span {
+.portfolio-live-frame {
     display: block;
-    height: 9px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.28);
-}
-
-.portfolio-launch-copy span:nth-child(1) {
-    width: 260px;
-    background: #c5ff41;
-}
-
-.portfolio-launch-copy span:nth-child(2) {
-    width: 300px;
-}
-
-.portfolio-launch-copy span:nth-child(3) {
-    width: 220px;
-}
-
-.portfolio-launch-section {
-    position: absolute;
-    left: 224px;
-    bottom: 58px;
-    width: 230px;
-    height: 34px;
-    border-radius: 3px;
-    background: rgba(255,255,255,0.12);
+    width: 100%;
+    height: min(620px, calc(100vh - 140px));
+    border: 0;
+    background: #080808;
 }
 
 .finder-hint {

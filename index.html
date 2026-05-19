@@ -33,7 +33,7 @@
             <div class="finder-toolbar" data-drag-handle>
                 <div class="finder-window-dots">
                     <button class="dot-red" type="button" aria-label="Close window" data-window-action="close"></button>
-                    <button class="dot-yellow" type="button" aria-label="Minimize window" data-window-action="minimize"></button>
+                    <button class="dot-yellow" type="button" aria-label="Close window" data-window-action="close"></button>
                     <button class="dot-green" type="button" aria-label="Zoom window" data-window-action="zoom"></button>
                 </div>
                 <div class="finder-window-title">akhil/</div>
@@ -66,37 +66,16 @@
             </div>
         </section>
 
-        <section class="finder-app-window" id="finder-app-window" aria-label="Text file preview" hidden>
-            <div class="finder-toolbar" data-drag-handle>
-                <div class="finder-window-dots">
-                    <button class="dot-red" type="button" aria-label="Close window" data-window-action="close"></button>
-                    <button class="dot-yellow" type="button" aria-label="Minimize window" data-window-action="minimize"></button>
-                    <button class="dot-green" type="button" aria-label="Zoom window" data-window-action="zoom"></button>
-                </div>
-                <div class="finder-window-title" id="app-window-title">goals.txt</div>
-            </div>
-            <p id="app-window-content">build useful things that scale.</p>
-        </section>
-
         <section class="finder-app-window portfolio-launch-window" id="portfolio-launch-window" aria-label="Portfolio preview" hidden>
             <div class="finder-toolbar" data-drag-handle>
                 <div class="finder-window-dots">
                     <button class="dot-red" type="button" aria-label="Close window" data-window-action="close"></button>
-                    <button class="dot-yellow" type="button" aria-label="Minimize window" data-window-action="minimize"></button>
-                    <button class="dot-green" type="button" aria-label="Zoom window" data-window-action="zoom"></button>
+                    <button class="dot-yellow" type="button" aria-label="Close window" data-window-action="close"></button>
+                    <button class="dot-green" type="button" aria-label="Open full portfolio" data-window-action="open-full"></button>
                 </div>
                 <div class="finder-window-title">portfolio.html</div>
             </div>
-            <div class="portfolio-launch-preview" aria-hidden="true">
-                <div class="portfolio-launch-nav"></div>
-                <div class="portfolio-launch-card"></div>
-                <div class="portfolio-launch-copy">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-                <div class="portfolio-launch-section"></div>
-            </div>
+            <iframe class="portfolio-live-frame" title="Portfolio preview" src="index.html?preview=1"></iframe>
         </section>
 
         <p class="finder-hint" id="finder-hint">Double-click akhil/</p>
