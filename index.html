@@ -30,27 +30,27 @@
         </button>
 
         <section class="finder-window" id="finder-window" aria-label="akhil folder" hidden>
-            <div class="finder-toolbar">
-                <div class="finder-window-dots" aria-hidden="true">
-                    <span class="dot-red"></span>
-                    <span class="dot-yellow"></span>
-                    <span class="dot-green"></span>
+            <div class="finder-toolbar" data-drag-handle>
+                <div class="finder-window-dots">
+                    <button class="dot-red" type="button" aria-label="Close window" data-window-action="close"></button>
+                    <button class="dot-yellow" type="button" aria-label="Minimize window" data-window-action="minimize"></button>
+                    <button class="dot-green" type="button" aria-label="Zoom window" data-window-action="zoom"></button>
                 </div>
                 <div class="finder-window-title">akhil/</div>
             </div>
             <div class="finder-content">
                 <div class="finder-files" role="list">
-                    <button class="finder-file text-file" type="button" role="listitem" data-title="goals.txt" data-content="build useful things that scale.">
+                    <button class="finder-file text-file" type="button" role="listitem" data-title="goals.txt" data-content="Build products that are useful at real scale: thoughtful systems, clear interfaces, fast feedback loops, and software that makes people feel more capable.">
                         <span class="file-icon file-text" aria-hidden="true">
                             <span></span><span></span><span></span>
                         </span>
                         <span>goals.txt</span>
                     </button>
-                    <button class="finder-file text-file" type="button" role="listitem" data-title="notes.txt" data-content="systems, product, people, outdoors.">
+                    <button class="finder-file text-file" type="button" role="listitem" data-title="about_akhil.txt" data-content="I like building backend systems, high-performance tools, and product experiences that feel practical and human. Away from the keyboard, I am probably outside, traveling, backpacking, or meeting someone new.">
                         <span class="file-icon file-text" aria-hidden="true">
                             <span></span><span></span><span></span>
                         </span>
-                        <span>notes.txt</span>
+                        <span>about_akhil.txt</span>
                     </button>
                     <button class="finder-file portfolio-file" id="portfolio-file" type="button" role="listitem" aria-label="Open portfolio">
                         <span class="file-icon file-html portfolio-preview" aria-hidden="true">
@@ -67,15 +67,36 @@
         </section>
 
         <section class="finder-app-window" id="finder-app-window" aria-label="Text file preview" hidden>
-            <div class="finder-toolbar">
-                <div class="finder-window-dots" aria-hidden="true">
-                    <span class="dot-red"></span>
-                    <span class="dot-yellow"></span>
-                    <span class="dot-green"></span>
+            <div class="finder-toolbar" data-drag-handle>
+                <div class="finder-window-dots">
+                    <button class="dot-red" type="button" aria-label="Close window" data-window-action="close"></button>
+                    <button class="dot-yellow" type="button" aria-label="Minimize window" data-window-action="minimize"></button>
+                    <button class="dot-green" type="button" aria-label="Zoom window" data-window-action="zoom"></button>
                 </div>
                 <div class="finder-window-title" id="app-window-title">goals.txt</div>
             </div>
             <p id="app-window-content">build useful things that scale.</p>
+        </section>
+
+        <section class="finder-app-window portfolio-launch-window" id="portfolio-launch-window" aria-label="Portfolio preview" hidden>
+            <div class="finder-toolbar" data-drag-handle>
+                <div class="finder-window-dots">
+                    <button class="dot-red" type="button" aria-label="Close window" data-window-action="close"></button>
+                    <button class="dot-yellow" type="button" aria-label="Minimize window" data-window-action="minimize"></button>
+                    <button class="dot-green" type="button" aria-label="Zoom window" data-window-action="zoom"></button>
+                </div>
+                <div class="finder-window-title">portfolio.html</div>
+            </div>
+            <div class="portfolio-launch-preview" aria-hidden="true">
+                <div class="portfolio-launch-nav"></div>
+                <div class="portfolio-launch-card"></div>
+                <div class="portfolio-launch-copy">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <div class="portfolio-launch-section"></div>
+            </div>
         </section>
 
         <p class="finder-hint" id="finder-hint">Double-click akhil/</p>

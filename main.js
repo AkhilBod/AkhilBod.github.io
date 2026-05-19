@@ -15,7 +15,9 @@
     const appWindow = document.getElementById('finder-app-window');
     const appWindowTitle = document.getElementById('app-window-title');
     const appWindowContent = document.getElementById('app-window-content');
+    const portfolioLaunchWindow = document.getElementById('portfolio-launch-window');
     const hint = document.getElementById('finder-hint');
+    let portfolioLaunchTimer;
 
     function exitIntro() {
         localStorage.setItem('intro_seen', '1');
@@ -27,6 +29,7 @@
         folder.classList.add('open');
         finderWindow.hidden = false;
         requestAnimationFrame(() => {
+            finderWindow.classList.remove('minimized');
             finderWindow.classList.add('open');
             finderWindow.querySelector('.finder-file')?.focus({ preventScroll: true });
         });
@@ -34,16 +37,94 @@
     }
 
     function openTextFile(file) {
-        appWindowTitle.textContent = file.dataset.title || 'notes.txt';
+        appWindowTitle.textContent = file.dataset.title || 'about_akhil.txt';
         appWindowContent.textContent = file.dataset.content || '';
         appWindow.hidden = false;
-        requestAnimationFrame(() => appWindow.classList.add('open'));
+        requestAnimationFrame(() => {
+            appWindow.classList.remove('minimized');
+            appWindow.classList.add('open');
+        });
+    }
+
+    function openPortfolioFile() {
+        clearTimeout(portfolioLaunchTimer);
+        portfolioLaunchWindow.hidden = false;
+        requestAnimationFrame(() => {
+            portfolioLaunchWindow.classList.remove('minimized');
+            portfolioLaunchWindow.classList.add('open');
+        });
+        if (hint) hint.textContent = 'Launching portfolio.html';
+        portfolioLaunchTimer = setTimeout(exitIntro, 950);
+    }
+
+    function closeWindow(win) {
+        if (win === portfolioLaunchWindow) clearTimeout(portfolioLaunchTimer);
+        win.classList.remove('open', 'minimized', 'zoomed');
+        if (win === finderWindow) {
+            folder.classList.remove('open');
+            if (hint) hint.textContent = 'Double-click akhil/';
+        }
+        setTimeout(() => {
+            if (!win.classList.contains('open')) win.hidden = true;
+        }, 180);
+    }
+
+    function minimizeWindow(win) {
+        win.classList.add('minimized');
+    }
+
+    function zoomWindow(win) {
+        win.classList.toggle('zoomed');
+    }
+
+    function makeWindowDraggable(win) {
+        const handle = win.querySelector('[data-drag-handle]');
+        if (!handle) return;
+
+        handle.addEventListener('pointerdown', (event) => {
+            if (event.target.closest('[data-window-action]')) return;
+            const rect = win.getBoundingClientRect();
+            const offsetX = event.clientX - rect.left;
+            const offsetY = event.clientY - rect.top;
+            win.classList.add('dragging');
+            win.classList.remove('zoomed');
+            handle.setPointerCapture(event.pointerId);
+
+            function move(moveEvent) {
+                win.style.left = `${moveEvent.clientX - offsetX + rect.width / 2}px`;
+                win.style.top = `${moveEvent.clientY - offsetY}px`;
+            }
+
+            function stop() {
+                win.classList.remove('dragging');
+                handle.removeEventListener('pointermove', move);
+                handle.removeEventListener('pointerup', stop);
+                handle.removeEventListener('pointercancel', stop);
+            }
+
+            handle.addEventListener('pointermove', move);
+            handle.addEventListener('pointerup', stop);
+            handle.addEventListener('pointercancel', stop);
+        });
     }
 
     folder.addEventListener('dblclick', openFolder);
-    portfolioFile.addEventListener('dblclick', exitIntro);
+    portfolioFile.addEventListener('dblclick', openPortfolioFile);
     textFiles.forEach(file => {
         file.addEventListener('dblclick', () => openTextFile(file));
+    });
+
+    [finderWindow, appWindow, portfolioLaunchWindow].forEach(win => {
+        makeWindowDraggable(win);
+        win.querySelectorAll('[data-window-action]').forEach(control => {
+            control.addEventListener('click', (event) => {
+                event.stopPropagation();
+                const action = control.dataset.windowAction;
+                if (action === 'close') closeWindow(win);
+                if (action === 'minimize') minimizeWindow(win);
+                if (action === 'zoom') zoomWindow(win);
+            });
+        });
     });
 
     document.addEventListener('keydown', (event) => {
@@ -58,7 +139,7 @@
             openTextFile(document.activeElement);
         }
         if (event.key === 'Enter' && document.activeElement === portfolioFile) {
-            exitIntro();
+            openPortfolioFile();
         }
     });
 })();
