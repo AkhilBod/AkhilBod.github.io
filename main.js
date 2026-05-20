@@ -4,8 +4,9 @@
     if (!overlay) return;
 
     const isPreview = new URLSearchParams(window.location.search).get('preview') === '1';
+    const isMobileIntro = window.matchMedia('(max-width: 640px), (hover: none), (pointer: coarse)').matches;
 
-    if (isPreview || localStorage.getItem('intro_seen')) {
+    if (isPreview || isMobileIntro || localStorage.getItem('intro_seen')) {
         overlay.remove();
         return;
     }
@@ -101,7 +102,6 @@
             const offsetX = event.clientX - rect.left;
             const offsetY = event.clientY - rect.top;
             win.classList.add('dragging');
-            win.classList.remove('zoomed');
             handle.setPointerCapture(event.pointerId);
 
             function move(moveEvent) {
