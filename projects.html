@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orbit | Akhil Bodahanapati</title>
-    <meta name="description" content="Distributed semantic search over 500K records, built with my team at CMU TartanHacks.">
+    <title>Projects | Akhil Bodahanapati</title>
+    <meta name="description" content="Things I have built.">
     <script>try{if(localStorage.getItem('theme')==='white')document.documentElement.setAttribute('data-theme','white')}catch(e){}</script>
     <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/site.css">
@@ -27,18 +27,17 @@
             </div>
         </header>
         <main>
-            <a class="back" href="/projects.html">&larr; Projects</a>
-            <h1>Orbit</h1>
-            <p class="lede">Distributed semantic search over 500K records, built with my team at CMU TartanHacks.</p>
-            <dl class="facts"><dt>Event</dt><dd>CMU TartanHacks</dd><dt>Result</dt><dd>Most Significant Innovation</dd><dt>Stack</dt><dd>Python, C++, FAISS, embeddings</dd><dt>Team</dt><dd>Hackathon team project</dd></dl>
-            <article class="prose">
-<p>Orbit lets you search a large dataset in plain language instead of guessing the right keywords. We built it over a weekend at TartanHacks, where it won Most Significant Innovation out of 700+ participants.</p>
-<p>The search side embeds every record and stores the vectors in FAISS. A query gets embedded the same way and we return the nearest neighbors. That part is fairly standard. The more interesting part was how we split the work.</p>
-<h2>Sharding the index</h2>
-<p>We partitioned the index across independent workers. Each worker searches its own shard and returns its top results, and a coordinator merges those lists into one ranking. To be honest, 500K vectors fit in one index on a laptop, so we didn't strictly need to shard. We did it because we wanted the design to keep working as the dataset grew, and because merging ranked results correctly across shards is a good problem to get right.</p>
-<p>The C++ pieces handled the hot path, and Python held the service and glue code together.</p>
-            </article>
-            <div class="links"><a class="inline-link" href="https://github.com/Not-Ethan/Orbit" target="_blank" rel="noopener">GitHub</a></div>
+            <h1>Projects</h1>
+            <p class="lede">Things I've built, at work, at hackathons, and on weekends.</p>
+            <div style="height:28px"></div>
+            <ul class="rows">
+<li><a class="row" href="/interviewsense.html"><div class="row-main"><div class="row-title">InterviewSense</div><div class="row-sub">AI interview practice platform, 25,000+ registered users</div></div><div class="row-meta">2026</div></a></li>
+<li><a class="row" href="/orbit.html"><div class="row-main"><div class="row-title">Orbit</div><div class="row-sub">Distributed semantic search, TartanHacks Most Significant Innovation</div></div><div class="row-meta">Hackathon</div></a></li>
+<li><a class="row" href="/gpu-scheduler.html"><div class="row-main"><div class="row-title">GPU scheduler</div><div class="row-sub">Kubernetes autoscaler for idle GPUs, 1st place Nutanix US and EMEA intern hackathon</div></div><div class="row-meta">Hackathon</div></a></li>
+<li><a class="row" href="/quant-engine.html"><div class="row-main"><div class="row-title">Quantitative Investment Engine</div><div class="row-sub">Backtesting engine, 1st place at Federated Hermes hackathon</div></div><div class="row-meta">Hackathon</div></a></li>
+<li><a class="row" href="/foresight.html"><div class="row-main"><div class="row-title">Foresight</div><div class="row-sub">Vision agent that reorders household items, TreeHacks top 5%</div></div><div class="row-meta">Hackathon</div></a></li>
+<li><a class="row" href="/price2produce.html"><div class="row-main"><div class="row-title">Price2Produce</div><div class="row-sub">Grocery price comparison across 50+ retailers</div></div><div class="row-meta">Side project</div></a></li>
+</ul>
         </main>
         <footer class="site-footer">
             <span>&copy; 2026 Akhil Bodahanapati</span>

@@ -1,118 +1,60 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="black">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InterviewSense — Akhil Bodahanapati</title>
-    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,900;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-    <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+    <title>InterviewSense | Akhil Bodahanapati</title>
+    <meta name="description" content="An interview practice platform for CS students. You talk through a mock interview and get graded feedback on what was weak.">
+    <script>try{if(localStorage.getItem('theme')==='white')document.documentElement.setAttribute('data-theme','white')}catch(e){}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/site.css">
+    
+    <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-8PGT98XQTN"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-8PGT98XQTN');
-    </script>
-    <style>
-        .proj-page { max-width: 800px; margin: 0 auto; padding: calc(var(--nav-h) + 4rem) 2rem 5rem; }
-        .proj-back { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--text-muted); text-decoration: none; font-size: 0.76rem; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; transition: var(--transition); margin-bottom: 3rem; }
-        .proj-back:hover { color: var(--primary); gap: 0.75rem; }
-        .proj-back i { font-size: 0.7rem; }
-        .proj-pg-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 3px; color: var(--primary); text-transform: uppercase; display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.25rem; }
-        .proj-pg-label::before { content: ''; display: inline-block; width: 24px; height: 1.5px; background: var(--primary); border-radius: 2px; }
-        .proj-pg-title { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 900; letter-spacing: -2px; color: var(--text); line-height: 1.05; margin-bottom: 2.5rem; }
-        .proj-pg-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 3.5rem; }
-        .proj-pg-metric { background: #111; padding: 1.75rem 1.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
-        .proj-pg-metric-num { font-size: 2.4rem; font-weight: 900; letter-spacing: -2px; color: var(--primary); line-height: 1; }
-        .proj-pg-metric-label { font-size: 0.62rem; font-weight: 700; letter-spacing: 1.5px; color: var(--text-muted); text-transform: uppercase; line-height: 1.5; }
-        .proj-pg-body { display: flex; flex-direction: column; gap: 2.5rem; }
-        .proj-pg-section h2 { font-size: 0.7rem; font-weight: 700; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); }
-        .proj-pg-section p { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.85; font-weight: 300; }
-        .proj-pg-stack { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-        .proj-pg-tag { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.8rem; background: rgba(197,255,65,0.07); border: 1px solid rgba(197,255,65,0.15); border-radius: 6px; font-size: 0.72rem; font-weight: 600; color: rgba(255,255,255,0.75); letter-spacing: 0.3px; }
-        .proj-pg-tag i { color: var(--primary); font-size: 0.75rem; }
-        .proj-pg-highlights { display: flex; flex-direction: column; gap: 0.75rem; }
-        .proj-pg-highlight { display: flex; align-items: flex-start; gap: 1rem; padding: 1.1rem 1.3rem; background: #111; border: 1px solid var(--border); border-radius: 10px; }
-        .proj-pg-highlight i { color: var(--primary); font-size: 0.9rem; margin-top: 0.15rem; flex-shrink: 0; }
-        .proj-pg-highlight p { font-size: 0.86rem; color: var(--text-secondary); line-height: 1.7; margin: 0; }
-        .proj-pg-links { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-        .proj-pg-link { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.2rem; border: 1px solid var(--border); border-radius: 8px; font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); text-decoration: none; transition: var(--transition); }
-        .proj-pg-link:hover { border-color: rgba(197,255,65,0.3); color: var(--text); }
-        .proj-pg-link.primary { background: var(--primary); border-color: var(--primary); color: #000; }
-        .proj-pg-link.primary:hover { background: #d4ff55; }
-        .proj-pg-video { position: relative; padding-top: 56.25%; border-radius: 12px; overflow: hidden; margin-bottom: 3.5rem; border: 1px solid var(--border); }
-        .proj-pg-video iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
-        @media (max-width: 640px) { .proj-pg-metrics { grid-template-columns: 1fr; } .proj-page { padding: calc(var(--nav-h) + 2rem) 1.25rem 4rem; } }
-    </style>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-8PGT98XQTN');</script>
 </head>
 <body>
-    <div class="cursor cursor-main"></div>
-    <div class="cursor cursor-follower"></div>
-
-    <nav class="navbar">
-        <div class="logo">AB</div>
-        <div class="nav-links">
-            <ul>
-                <li><a href="index.html#home">Home</a></li>
-                <li><a href="index.html#experience">Experience</a></li>
-                <li><a href="index.html#projects">Projects</a></li>
-                <li><a href="index.html#skills">Skills</a></li>
-            </ul>
-        </div>
-        <div class="burger"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div>
-    </nav>
-
-    <div class="proj-page">
-
-        <a href="index.html#projects" class="proj-back"><i class="fas fa-arrow-left"></i> Back to Projects</a>
-
-        <div class="proj-pg-label">AI SaaS · 12K+ Users · Production</div>
-        <h1 class="proj-pg-title">InterviewSense</h1>
-
-        <div class="proj-pg-video" data-autoplay-video data-playback-rate="2">
-            <iframe src="https://player.vimeo.com/video/1171183131?api=1&background=0&autoplay=0&loop=1&muted=1&controls=0&title=0&byline=0&portrait=0&autopause=0&dnt=1&playsinline=1" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
-        </div>
-
-        <div class="proj-pg-body">
-
-            <div class="proj-pg-section">
-                <h2>Overview</h2>
-                <p>InterviewSense is an AI interview prep platform used by 12K+ people to practice technical and behavioral interviews with real-time feedback. It turns mock interviews into a tighter feedback loop: answer, evaluate, learn what was weak, and improve the next attempt.</p>
-            </div>
-
-            <div class="proj-pg-section">
-                <h2>Why it matters</h2>
-                <p>Most interview prep tools stop at question banks. InterviewSense focuses on the live performance layer: communication clarity, answer structure, technical correctness, and repeatable improvement across sessions.</p>
-            </div>
-
-            <div class="proj-pg-section">
-                <h2>Built with</h2>
-                <p>Python, FastAPI, PostgreSQL, Redis, OpenAI API, React, Docker, AWS</p>
-            </div>
-
-            <div class="proj-pg-section">
-                <h2>Links</h2>
-                <div class="proj-pg-links">
-                    <a href="https://interviewsense.org" target="_blank" class="proj-pg-link primary"><i class="fas fa-external-link-alt"></i> Live Site</a>
+    
+    <div class="page">
+        <header class="site-header">
+            <a class="site-name" href="/">Akhil Bodahanapati</a>
+            <div class="header-right">
+                <nav class="tabs"><a href="/">Home</a><a href="/projects.html" aria-current="page">Projects</a><a href="/writing.html">Writing</a></nav>
+                <div class="theme-switch" role="group" aria-label="Theme">
+                    <button type="button" data-theme="black" aria-pressed="true">black</button>
+                    <button type="button" data-theme="white" aria-pressed="false">white</button>
                 </div>
             </div>
-
-        </div>
+        </header>
+        <main>
+            <a class="back" href="/projects.html">&larr; Projects</a>
+            <h1>InterviewSense</h1>
+            <p class="lede">An interview practice platform for CS students. You talk through a mock interview and get graded feedback on what was weak.</p>
+            <dl class="facts"><dt>Role</dt><dd>Founder and engineer</dd><dt>Users</dt><dd>25,000+ registered</dd><dt>Stack</dt><dd>Next.js, TypeScript, PostgreSQL, Prisma, Azure OpenAI, Deepgram, Stripe, Redis</dd><dt>Status</dt><dd>Live</dd></dl>
+            <article class="prose">
+<p>Most interview prep tools are question banks. You read a prompt, think of an answer, and nobody tells you that your answer rambled for four minutes before getting to the point. InterviewSense listens to you actually answer and then tells you what went wrong.</p>
+<p>The core loop is simple. You pick a behavioral, technical, or system design round. The interviewer talks to you, you answer out loud, and when you're done you get a breakdown: structure, clarity, technical correctness, and the specific moments where the answer went sideways.</p>
+<h2>How it works</h2>
+<p>Speech goes through Deepgram for transcription and text-to-speech, so the interview feels like a conversation instead of a form. A fast model handles the live turns and a slower, stronger one does the grading after the session ends. Splitting it that way kept the conversation responsive without making the feedback shallow.</p>
+<p>The coding round runs candidate code against test cases through Judge0, with a Monaco editor in the browser. For the topic and company question picks, I skip the model entirely and pull from a curated problem set, which turned out to be faster and more accurate than asking an LLM to pick a problem.</p>
+<h2>The part I am proudest of</h2>
+<p>Billing. That sounds boring, but it's where most of the real bugs lived. Every AI feature costs credits, and early on a failed model call could still eat a user's credit. Now a request reserves credits first, commits them only when the response finishes, and refunds them if anything fails or the stream is cut off. All of that happens inside database transactions, so two requests racing each other can't double-spend. Stripe webhooks are signature-checked and keep subscription state in sync, including older prices that grandfathered subscribers still pay.</p>
+<h2>Getting people to find it</h2>
+<p>Most of the traffic comes from search. A daily job pulls internship and full-time postings into structured data, and a content pipeline turns that into pages people actually search for. Unglamorous work, and it's where most of the users come from.</p>
+<p>There's also a desktop companion app for macOS and Windows that signs in with a device code, keeps a rotating refresh token, and talks to the same credit system.</p>
+            </article>
+            <div class="links"><a class="inline-link" href="https://interviewsense.org" target="_blank" rel="noopener">interviewsense.org</a></div>
+        </main>
+        <footer class="site-footer">
+            <span>&copy; 2026 Akhil Bodahanapati</span>
+            <nav>
+                <a href="https://github.com/AkhilBod" target="_blank" rel="noopener">GitHub</a>
+                <a href="https://linkedin.com/in/akhil-bod" target="_blank" rel="noopener">LinkedIn</a>
+                <a href="mailto:akkiisan9@gmail.com">Email</a>
+            </nav>
+        </footer>
     </div>
-
-    <footer>
-        <div class="footer-inner">
-            <p>&copy; 2025 Akhil Bodahanapati</p>
-            <div class="social-links">
-                <a href="https://github.com/AkhilBod" target="_blank"><i class="fab fa-github"></i></a>
-                <a href="https://linkedin.com/in/akhil-bod" target="_blank"><i class="fab fa-linkedin"></i></a>
-                <a href="mailto:akkiisan9@gmail.com"><i class="fas fa-envelope"></i></a>
-            </div>
-        </div>
-    </footer>
-
-    <script src="main.js"></script>
+    <script src="/site.js"></script>
+    
 </body>
 </html>

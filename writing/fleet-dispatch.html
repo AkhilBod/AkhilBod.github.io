@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="black">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building a robotaxi dispatcher from scratch | Akhil Bodahanapati</title>
+    <meta name="description" content="Comparing greedy, batched, and rebalancing dispatch in a C++ robotaxi simulator.">
+    <script>try{if(localStorage.getItem('theme')==='white')document.documentElement.setAttribute('data-theme','white')}catch(e){}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/site.css">
+    
+    <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8PGT98XQTN"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-8PGT98XQTN');</script>
+</head>
+<body>
+    
+    <div class="page">
+        <header class="site-header">
+            <a class="site-name" href="/">Akhil Bodahanapati</a>
+            <div class="header-right">
+                <nav class="tabs"><a href="/">Home</a><a href="/projects.html">Projects</a><a href="/writing.html" aria-current="page">Writing</a></nav>
+                <div class="theme-switch" role="group" aria-label="Theme">
+                    <button type="button" data-theme="black" aria-pressed="true">black</button>
+                    <button type="button" data-theme="white" aria-pressed="false">white</button>
+                </div>
+            </div>
+        </header>
+        <main>
+            <a class="back" href="/writing.html">&larr; Writing</a>
+            <h1>Building a robotaxi dispatcher from scratch</h1>
+            <div class="meta-line">Oct 2026 · C++17 · <a class="inline-link" href="https://github.com/AkhilBod/fleet-dispatch" target="_blank" rel="noopener">github.com/AkhilBod/fleet-dispatch</a></div>
+            <article class="prose">
+<p>When someone requests a ride, which car should go? The obvious answer is the closest free one. I wanted to know how wrong the obvious answer is, so I built a small simulator and tested three policies against each other on the same simulated day.</p>
+<p>Short version: when the fleet is stretched thin, sending the nearest car is surprisingly bad. Waiting 30 seconds and assigning cars in batches cut the average wait by more than half. When there are plenty of cars, the simple approach is fine, and sometimes better.</p>
+
+<h2>The fake city</h2>
+<p>The city is a 30 by 30 grid of intersections. Every fifth row and column is an arterial road at 50 km/h, and the side streets are slower, with a bit of random variation on each road. Travel times come from Dijkstra. I cache the full shortest-path tree for every node I start from, so after the first lookup, an ETA is just an array read.</p>
+<p>Demand comes from a Poisson process for each zone. There's a morning peak, an evening peak, and a downtown hotspot that gets more pickups. Over a simulated day that's 25,843 ride requests, peaking at about 2,500 an hour. Riders give up if nobody picks them up within 10 minutes.</p>
+
+<h2>Simulating it</h2>
+<p>Cars don't move one tick at a time. The simulator is event driven. Each car holds a planned route with the time it reaches each intersection, and an event queue handles everything else: a request arrives, a rider gives up, a car reaches a pickup, a car finishes a dropoff, a dispatch tick fires.</p>
+<p>The fiddliest part was cancelling plans. If a repositioning car gets assigned a rider halfway through its drive, its old "arrived" event is still sitting in the queue. Instead of digging it out, each car has a version number. Changing a car's plan bumps the version, and any event with an old version gets ignored when it comes off the queue.</p>
+<p>Policies can only do two things: assign a car to a rider, or send an idle car somewhere. Both throw if the car is busy or the rider isn't waiting anymore. That's how the tests prove no car ever gets double-booked.</p>
+
+<h2>Three policies</h2>
+<h3>Greedy</h3>
+<p>A request comes in, send the nearest idle car that can get there before the rider gives up. When a car frees up, it takes the oldest rider it can still reach.</p>
+<h3>Batched</h3>
+<p>Every 30 seconds, collect the waiting riders and the free cars, build a matrix of pickup ETAs, and solve the assignment problem exactly with the Hungarian algorithm. Pairs where the car would arrive too late get a huge cost, so the solver first matches as many valid pairs as it can and then minimizes total ETA. I tested the solver against brute force on 900 random small matrices, because an assignment solver that's slightly wrong is very hard to notice from the outside.</p>
+<h3>Rebalance</h3>
+<p>Batched assignment, plus moving idle cars toward where demand is about to be. Every two minutes it forecasts each zone's demand with a 30-minute moving average, compares that to the idle cars nearby, and sends spare cars to the zones with the biggest shortfall. It moves at most 10% of the fleet per round, so it can't empty one side of the city to chase the other.</p>
+
+<h2>What happened</h2>
+<p>Same seed, same demand, 200 cars. That's not enough cars for the peaks.</p>
+<div class="table-wrap"><table>
+<tr><th>Policy</th><th>Served</th><th>Mean wait</th><th>p95 wait</th><th>Picked up in 5 min</th><th>Empty km</th></tr>
+<tr><td>greedy</td><td>89.3%</td><td>327 s</td><td>594 s</td><td>40.9%</td><td>26,529</td></tr>
+<tr><td>batched</td><td>92.2%</td><td>150 s</td><td>438 s</td><td>81.1%</td><td>15,874</td></tr>
+<tr><td>rebalance</td><td>92.1%</td><td>148 s</td><td>444 s</td><td>80.5%</td><td>18,561</td></tr>
+</table></div>
+<p>Greedy grabs the nearest car for each rider as they arrive, which feels efficient. But it keeps sending cars across town for one rider when a slightly worse match now would leave that car free for three nearby riders a minute later. Batching sees the whole board. It halved the mean wait, doubled the share of riders picked up within five minutes, and drove 40% fewer empty kilometers.</p>
+<p>With 400 cars the picture flips.</p>
+<div class="table-wrap"><table>
+<tr><th>Policy</th><th>Served</th><th>Mean wait</th><th>p95 wait</th><th>Empty km</th></tr>
+<tr><td>greedy</td><td>100.0%</td><td>53 s</td><td>135 s</td><td>12,876</td></tr>
+<tr><td>batched</td><td>100.0%</td><td>65 s</td><td>145 s</td><td>12,224</td></tr>
+<tr><td>rebalance</td><td>100.0%</td><td>57 s</td><td>120 s</td><td>16,838</td></tr>
+</table></div>
+<p>When there are free cars everywhere, the nearest one is usually the right one, and making riders wait up to 30 seconds for the next batch just adds delay. Greedy wins on mean wait. Rebalancing gets the best p95, but it pays for that with about 30% more empty driving than greedy. Whether that trade is worth it depends on whether you care more about the worst rides or about your fuel bill.</p>
+<p>Another seed is worth mentioning. On a different seed with 400 cars, greedy fell apart: mean wait jumped to 99 seconds and p95 to 457. The batched policies held up on every seed I tried. Greedy is fine on average, but it's fragile.</p>
+<p>The solver is not the bottleneck. A batch takes a few microseconds on average. The worst batch I saw took about 5 milliseconds.</p>
+
+<h2>What I'd change</h2>
+<p>Plenty. Travel times are fixed, so there's no traffic, and adding cars never slows anyone down. Nobody shares rides. Once a car is heading to a pickup, it never gets reassigned, even if a better rider shows up. The demand forecast is a moving average, so it always lags the start of a peak, and I picked the rebalancing settings by hand instead of tuning them.</p>
+<p>The one I want to try next is reassignment. Batching only looks at free cars, and I suspect a lot of the remaining wait at 200 cars comes from cars that committed to a far-away rider a minute too early.</p>
+<p>The code, tests, and full results are on <a href="https://github.com/AkhilBod/fleet-dispatch" target="_blank" rel="noopener">GitHub</a>. It builds with CMake and has no dependencies.</p>
+            </article>
+        </main>
+        <footer class="site-footer">
+            <span>&copy; 2026 Akhil Bodahanapati</span>
+            <nav>
+                <a href="https://github.com/AkhilBod" target="_blank" rel="noopener">GitHub</a>
+                <a href="https://linkedin.com/in/akhil-bod" target="_blank" rel="noopener">LinkedIn</a>
+                <a href="mailto:akkiisan9@gmail.com">Email</a>
+            </nav>
+        </footer>
+    </div>
+    <script src="/site.js"></script>
+    
+</body>
+</html>

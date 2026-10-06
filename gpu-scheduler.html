@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orbit | Akhil Bodahanapati</title>
-    <meta name="description" content="Distributed semantic search over 500K records, built with my team at CMU TartanHacks.">
+    <title>GPU scheduler | Akhil Bodahanapati</title>
+    <meta name="description" content="A Kubernetes scheduler that autoscales GPU workloads and releases idle GPUs. Won the Nutanix US and EMEA intern hackathon.">
     <script>try{if(localStorage.getItem('theme')==='white')document.documentElement.setAttribute('data-theme','white')}catch(e){}</script>
     <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/site.css">
@@ -28,17 +28,15 @@
         </header>
         <main>
             <a class="back" href="/projects.html">&larr; Projects</a>
-            <h1>Orbit</h1>
-            <p class="lede">Distributed semantic search over 500K records, built with my team at CMU TartanHacks.</p>
-            <dl class="facts"><dt>Event</dt><dd>CMU TartanHacks</dd><dt>Result</dt><dd>Most Significant Innovation</dd><dt>Stack</dt><dd>Python, C++, FAISS, embeddings</dd><dt>Team</dt><dd>Hackathon team project</dd></dl>
+            <h1>GPU scheduler</h1>
+            <p class="lede">A Kubernetes scheduler that autoscales GPU workloads and releases idle GPUs. Won the Nutanix US and EMEA intern hackathon.</p>
+            <dl class="facts"><dt>Event</dt><dd>Nutanix intern hackathon, US and EMEA</dd><dt>Result</dt><dd>1st place</dd><dt>Stack</dt><dd>Python, Kubernetes</dd></dl>
             <article class="prose">
-<p>Orbit lets you search a large dataset in plain language instead of guessing the right keywords. We built it over a weekend at TartanHacks, where it won Most Significant Innovation out of 700+ participants.</p>
-<p>The search side embeds every record and stores the vectors in FAISS. A query gets embedded the same way and we return the nearest neighbors. That part is fairly standard. The more interesting part was how we split the work.</p>
-<h2>Sharding the index</h2>
-<p>We partitioned the index across independent workers. Each worker searches its own shard and returns its top results, and a coordinator merges those lists into one ranking. To be honest, 500K vectors fit in one index on a laptop, so we didn't strictly need to shard. We did it because we wanted the design to keep working as the dataset grew, and because merging ranked results correctly across shards is a good problem to get right.</p>
-<p>The C++ pieces handled the hot path, and Python held the service and glue code together.</p>
+<p>GPUs are the most expensive thing in most clusters, and a lot of the time they sit there doing nothing. A job finishes, or a notebook gets left open overnight, and the GPU stays reserved anyway.</p>
+<p>For the Nutanix intern hackathon, I built a scheduler on Kubernetes that watches GPU workloads, scales them up when there is demand, and releases GPUs that have gone idle so they can be handed to something else or shut off. It's written in Python.</p>
+<p>It won first place across the US and EMEA intern cohorts.</p>
             </article>
-            <div class="links"><a class="inline-link" href="https://github.com/Not-Ethan/Orbit" target="_blank" rel="noopener">GitHub</a></div>
+            
         </main>
         <footer class="site-footer">
             <span>&copy; 2026 Akhil Bodahanapati</span>

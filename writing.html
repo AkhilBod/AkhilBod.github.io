@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Foresight | Akhil Bodahanapati</title>
-    <meta name="description" content="A camera that notices when you are running low on household stuff and reorders it. Built at TreeHacks.">
+    <title>Writing | Akhil Bodahanapati</title>
+    <meta name="description" content="Notes on things I have built and learned.">
     <script>try{if(localStorage.getItem('theme')==='white')document.documentElement.setAttribute('data-theme','white')}catch(e){}</script>
     <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/site.css">
@@ -19,7 +19,7 @@
         <header class="site-header">
             <a class="site-name" href="/">Akhil Bodahanapati</a>
             <div class="header-right">
-                <nav class="tabs"><a href="/">Home</a><a href="/projects.html" aria-current="page">Projects</a><a href="/writing.html">Writing</a></nav>
+                <nav class="tabs"><a href="/">Home</a><a href="/projects.html">Projects</a><a href="/writing.html" aria-current="page">Writing</a></nav>
                 <div class="theme-switch" role="group" aria-label="Theme">
                     <button type="button" data-theme="black" aria-pressed="true">black</button>
                     <button type="button" data-theme="white" aria-pressed="false">white</button>
@@ -27,16 +27,12 @@
             </div>
         </header>
         <main>
-            <a class="back" href="/projects.html">&larr; Projects</a>
-            <h1>Foresight</h1>
-            <p class="lede">A camera that notices when you are running low on household stuff and reorders it. Built at TreeHacks.</p>
-            <dl class="facts"><dt>Event</dt><dd>TreeHacks (Stanford)</dd><dt>Result</dt><dd>Top 5%</dd><dt>Stack</dt><dd>React, TypeScript, GPT-4o Vision, Browserbase, Python</dd></dl>
-            <article class="prose">
-<p>Most people remember they're out of dish soap while standing at the sink. Foresight watches your daily routines through an ambient camera, notices things like washing dishes without soap, and reorders the item before you run out.</p>
-<p>A vision model reads the scene, and an agent drives a real browser session through Browserbase to place the order. We finished in the top 5% at TreeHacks.</p>
-<p>Most of the hard part was deciding when the agent should not act. Buying the wrong thing is a lot worse than buying nothing.</p>
-            </article>
-            <div class="links"><a class="inline-link" href="https://github.com/AkhilBod/Foresight-TreeHacks" target="_blank" rel="noopener">GitHub</a></div>
+            <h1>Writing</h1>
+            <p class="lede">Longer notes on things I've built and what I learned building them.</p>
+            <div style="height:28px"></div>
+            <ul class="rows">
+<li><a class="row" href="/writing/fleet-dispatch.html"><div class="row-main"><div class="row-title">Building a robotaxi dispatcher from scratch</div><div class="row-sub">Greedy matching, batched assignment, and why idle cars should move</div></div><div class="row-meta">Oct 2026</div></a></li>
+</ul>
         </main>
         <footer class="site-footer">
             <span>&copy; 2026 Akhil Bodahanapati</span>
