@@ -386,7 +386,7 @@ body:has(.finder-intro-overlay) .cursor-follower {
     width: 17px;
     height: 5px;
     border-radius: 1px;
-    background: #c5ff41;
+    background: #ededed;
     opacity: 0.78;
 }
 

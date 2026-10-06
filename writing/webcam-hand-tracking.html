@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="black">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aiming with a finger: hand tracking from one webcam | Akhil Bodahanapati</title>
+    <meta name="description" content="Lessons from building webcam finger-gun aiming at SteelHacks.">
+    <script>try{if(localStorage.getItem('theme')==='white')document.documentElement.setAttribute('data-theme','white')}catch(e){}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/site.css">
+    
+    <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8PGT98XQTN"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-8PGT98XQTN');</script>
+</head>
+<body>
+    
+    <div class="page">
+        <header class="site-header">
+            <a class="site-name" href="/">Akhil Bodahanapati</a>
+            <div class="header-right">
+                <nav class="tabs"><a href="/">Home</a><a href="/projects.html">Projects</a><a href="/writing.html" aria-current="page">Writing</a></nav>
+                <div class="theme-switch" role="group" aria-label="Theme">
+                    <button type="button" data-theme="black" aria-pressed="true">black</button>
+                    <button type="button" data-theme="white" aria-pressed="false">white</button>
+                </div>
+            </div>
+        </header>
+        <main>
+            <a class="back" href="/writing.html">&larr; Writing</a>
+            <h1>Aiming with a finger: hand tracking from one webcam</h1>
+            <div class="meta-line">Oct 2026 · Red Dead Dimension · SteelHacks 2026</div>
+            <article class="prose">
+<p>At SteelHacks we built a Wild West train shooter with no controller. You make a finger gun at your webcam, point, and drop your thumb to fire. It sounds like a gimmick. Done naively, it plays like one: the aim jitters, shots land off target, and it behaves differently depending on how far you sit from the laptop.</p>
+<p>Three things made it feel good.</p>
+
+<h2>Measure distance with bones that don't stretch</h2>
+<p>MediaPipe gives you a hand skeleton in image coordinates. The problem is that image coordinates depend on how far away you are. Move your hand five centimeters at a desk and it covers a lot of pixels. Do the same from across a room and it barely moves.</p>
+<p>Palm bones are a fixed length on a given person. So the size they appear in the image tells you roughly how far the hand is from the camera. Once we scaled everything by that, aim was measured in real centimeters of fingertip travel, and the game felt the same sitting at a laptop or standing back.</p>
+
+<h2>Use where the finger is, not where it points</h2>
+<p>The obvious approach is to cast a ray along the finger and see where it hits the screen. We tried it. When you point at a camera, your finger is basically a dot to that camera, so its direction is mostly noise.</p>
+<p>Fingertip position was much better. It held steady to about 2 mm. We stopped trying to read the angle and just tracked where the tip went.</p>
+
+<h2>Fire where you were aiming, not where you ended up</h2>
+<p>Dropping your thumb to shoot jerks your whole hand a little, so a shot drifts off target at exactly the moment you fire. The fix was to keep about a second of aim history and, when the trigger fires, use the aim from just before the jerk started.</p>
+<p>On top of that we used a One Euro filter, which smooths a lot when the hand is still and almost not at all when it moves fast. That got rid of the jitter without making fast flicks feel laggy.</p>
+
+<h2>Recordings beat guessing</h2>
+<p>The tracking code has no camera or network calls in it, so a recorded session replays through it exactly the same way every time. Every threshold we ended up with came from replaying real recordings, not from tweaking a number and squinting at the screen.</p>
+<p>The code is on <a href="https://github.com/AkhilBod/fingerGunGame" target="_blank" rel="noopener">GitHub</a>.</p>
+            </article>
+        </main>
+        <footer class="site-footer">
+            <span>&copy; 2026 Akhil Bodahanapati</span>
+            <nav>
+                <a href="https://github.com/AkhilBod" target="_blank" rel="noopener">GitHub</a>
+                <a href="https://linkedin.com/in/akhil-bod" target="_blank" rel="noopener">LinkedIn</a>
+                <a href="mailto:akkiisan9@gmail.com">Email</a>
+            </nav>
+        </footer>
+    </div>
+    <script src="/site.js"></script>
+    
+</body>
+</html>
