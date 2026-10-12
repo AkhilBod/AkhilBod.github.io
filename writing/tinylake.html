@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Two writers, one table, no locks | Akhil Bodahanapati</title>
+    <title>The bug that sent me building a tiny data lake | Akhil Bodahanapati</title>
     <meta name="description" content="What a bug at Nutanix taught me about how data lakes handle two writers at once.">
     <script>try{if(localStorage.getItem('theme')==='white')document.documentElement.setAttribute('data-theme','white')}catch(e){}</script>
     <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -28,35 +28,22 @@
         </header>
         <main>
             <a class="back" href="/writing.html">&larr; Writing</a>
-            <h1>Two writers, one table, no locks</h1>
+            <h1>The bug that sent me building a tiny data lake</h1>
             <div class="meta-line">Oct 2026 · Python · <a class="inline-link" href="https://github.com/AkhilBod/tinylake" target="_blank" rel="noopener">github.com/AkhilBod/tinylake</a></div>
             <article class="prose">
-<p>Two updates hit the same cluster at almost the same moment, and one of them quietly erased the other. No error. No crash. A customer's settings were just gone.</p>
-<p>That was the bug I spent the most time on during my internship at Nutanix. The fix itself wasn't huge, but getting there meant thinking hard about one question: what should happen when two people change the same thing at once?</p>
-<p>The question stuck around after the summer ended. A year earlier I'd built a backtester for a hackathon on top of Delta tables, which are just Parquet files in a folder. Parquet files can't be edited after they're written. And yet lots of jobs write to those tables at once, and nobody ever loses data. I'd relied on that the whole hackathon without once wondering how it worked. So I built a small version to find out.</p>
-
-<h2>The table is a diary</h2>
-<p>The trick took me embarrassingly long to see. Next to the data there's a folder of numbered notes. Note 0 says what columns the table has. Note 1 says "these three files are in." Note 2 says "add this file, drop that one." The table is whatever you get from reading the notes in order.</p>
-<p>Nobody edits a note or a data file, ever. You only add new ones. Once I got that, a feature I assumed would be hard came for free. Want the table as it looked last Tuesday? Stop reading at Tuesday's note.</p>
-
-<h2>Back to my bug</h2>
-<p>Here's the Nutanix problem in this world. Two writers finish at the same time and both try to write note 13. The filesystem lets exactly one of them create the file. The loser has to figure out whether its change still makes sense on top of the winner's.</p>
-<p>The whole commit boils down to a loop like this:</p>
+<p>Most of what I remember from my Nutanix internship comes back to one bug. When two partial updates to the same cluster came in close together, one could overwrite the other, and whatever the first had changed was lost. A customer would set something and later find it had quietly reverted. I spent a lot of the summer in that code, reworking how partial updates got applied so that concurrent ones would stop clobbering each other.</p>
+<p>What bugged me afterwards was that I'd already used a system that deals with this exact situation and never given it a thought. The year before, at a hackathon at Federated Hermes, my backtester read and wrote Delta tables on Databricks. A Delta table is a folder of Parquet files, and you can't open a Parquet file and change a row in it. People still point a pile of jobs at the same table and it holds up fine. I wanted to know how, and reading about it only got me so far, so I tried writing a small version myself. It came out to about 800 lines of Python, and I called it tinylake.</p>
+<p>The piece that made everything else make sense was the log. Next to the data files sits a folder of numbered JSON files, one per commit, and each one lists which data files to add and which to remove. To find out what's in the table, you start at commit zero and replay them in order. Since nothing is ever changed in place, you can also see the table as it was at any earlier point by stopping the replay early. Delta calls that time travel, and I'd assumed it would be a big chunk of work. It ended up being one optional argument.</p>
+<p>Concurrency is where my Nutanix bug shows up again. Say two writers both start from commit 12, do their work, and both try to save commit 13. All the storage has to promise is that creating a file fails if the file is already there, so exactly one of them gets 13. The other reads what the winner did and decides whether its own change still holds up. If the winner only appended rows, the loser just tries again as commit 14, and because its data files are already written, nothing gets redone. If the winner deleted a file the loser had read from, the loser gives up and raises an error instead of writing over it. That second case is basically the fix I wrote over the summer, sitting in a completely different system, and I'll admit it was satisfying to find it there.</p>
+<p>Stripped down, a commit looks like this:</p>
 <pre><code>version = read_version + 1
 while not create_if_missing(f"_log/{version}.json", my_changes):
     check_winner(version)  # raises if their change breaks mine
     version += 1</code></pre>
-<p>Most of the time the answer is "go ahead." If the winner only added data, the loser takes note 14 and carries on, with no redone work. It only backs off when the winner deleted a file the loser was relying on. That's basically my summer bug, solved by checking what changed before writing instead of after. Seeing it pop up in a totally different system was my favorite part of the project.</p>
-<p>I didn't trust it until I tried to break it. I had 8 separate processes hammer the same table with 120 commits at once, then counted every row. All there, none doubled. The sneakier cases got their own tests. One example: if a delete loses a race to a new append, the new rows survive the delete. That sounds like a bug, but the real thing does it on purpose. I wanted it written down before it confused me later.</p>
-
-<h2>The guess I got wrong</h2>
-<p>Every file also remembers its smallest and largest value per column, so a search can skip files that can't contain a match. How much gets skipped depends on how the rows are laid out, and I was confident I knew the best layout.</p>
-<p>There's a trick called Z-order that weaves two columns together, and it's supposed to shine when you filter on both. I benchmarked it on 2 million rows fully expecting it to win. It tied. Plain sorting had already cut the search to 3 files out of 200, and there was nothing left to beat. Z-order's real strength turned out to be the case I hadn't planned for: you don't know which column the next search will use. Sorting only helps one column, while Z-order kept both of them cheap.</p>
-<p>I like that result more than if I'd been right. I would have bet on the wrong layout, and now I know to measure first.</p>
-
-<h2>What's next</h2>
-<p>Deleting a single row still rewrites the whole file it lives in, which bugs me. The fix is a small side file that marks dead rows, so that's the next thing I want to build.</p>
-<p>The code is on <a href="https://github.com/AkhilBod/tinylake" target="_blank" rel="noopener">GitHub</a>. The README has the full benchmark if you want the numbers.</p>
+<p>I didn't want to take it on faith, so I had eight processes append to one table at the same time, 120 commits between them, and then counted the rows to make sure each one landed exactly once. I also wrote a test for a case that looks wrong the first time you see it: if a delete races an append and loses, the newly appended rows survive the delete. Delta works the same way on purpose, but I'm pretty sure I'd have filed it as a bug six months from now if I hadn't pinned it down.</p>
+<p>The other thing I wanted to understand was why people bother reorganizing their files at all. Every entry in the log records the min and max of each column for that file, so a query can skip any file whose range can't possibly match. How much that helps depends on how the rows are spread out. I generated 2 million rows with two random columns and tried three layouts: the order the rows arrived in, sorted by the first column, and Z-ordered on both, which interleaves the bits of the two columns so rows with nearby values end up in the same files.</p>
+<p>I went in expecting Z-order to win clearly on queries that filter both columns, since that's the case it's designed for. It tied with plain sorting, because sorting had already narrowed those queries to 3 files out of 200 and there wasn't anything left to gain. Where Z-order earned its keep was on queries that only filtered the second column. The sorted table had to read all 200 files for those, while the Z-ordered one read about 21. So sorting wins when you know what people will filter on, and Z-order is the safer bet when you don't. The full numbers are in the README.</p>
+<p>The obvious gap right now is deletes. Removing one row means rewriting the whole file it lives in, which is fine for a toy and pretty bad for anything real. Delta gets around it with deletion vectors, small side files that mark which rows are gone, and that's what I'd like to add next. The code is on <a href="https://github.com/AkhilBod/tinylake" target="_blank" rel="noopener">GitHub</a> if you want to dig through it.</p>
             </article>
         </main>
         <footer class="site-footer">
