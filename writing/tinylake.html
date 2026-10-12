@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="black">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How a lakehouse table works, built small | Akhil Bodahanapati</title>
+    <meta name="description" content="Building a small Delta-Lake-style table format in Python: a transaction log, optimistic concurrency, time travel, and Z-order data skipping.">
+    <script>try{if(localStorage.getItem('theme')==='white')document.documentElement.setAttribute('data-theme','white')}catch(e){}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/site.css">
+    
+    <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8PGT98XQTN"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-8PGT98XQTN');</script>
+</head>
+<body>
+    
+    <div class="page">
+        <header class="site-header">
+            <a class="site-name" href="/">Akhil Bodahanapati</a>
+            <div class="header-right">
+                <nav class="tabs"><a href="/">Home</a><a href="/projects.html">Projects</a><a href="/writing.html" aria-current="page">Writing</a></nav>
+                <div class="theme-switch" role="group" aria-label="Theme">
+                    <button type="button" data-theme="black" aria-pressed="true">black</button>
+                    <button type="button" data-theme="white" aria-pressed="false">white</button>
+                </div>
+            </div>
+        </header>
+        <main>
+            <a class="back" href="/writing.html">&larr; Writing</a>
+            <h1>How a lakehouse table works, built small</h1>
+            <div class="meta-line">Oct 2026 · Python · <a class="inline-link" href="https://github.com/AkhilBod/tinylake" target="_blank" rel="noopener">github.com/AkhilBod/tinylake</a></div>
+            <article class="prose">
+<p>Formats like Delta Lake turn a folder of Parquet files into something that behaves like a database table. You get transactions, several writers at once, and the ability to read the table as it was last Tuesday. I had used that from the outside but couldn't have explained how a pile of immutable files pulls it off. So I built a small version, about 840 lines of Python including tests, to find out.</p>
+<p>The short answer is that almost everything comes from one idea: the table isn't the files, it's a log of which files count.</p>
+
+<h2>The log is the table</h2>
+<p>A table is a directory of Parquet files plus a <code>_log/</code> folder. Each commit is one numbered JSON file, and each line in it is an action: this file was added (with its row count and the min and max of every column), this file was removed, the schema is now this. To find out what version 12 of the table contains, replay commits 0 through 12 and see which files are left.</p>
+<p>Data files are never edited. A delete reads the files that hold matching rows, writes new files without those rows, and commits "remove the old ones, add the new ones" as one action list. That one choice gives you a lot for free. A reader that loaded version 11 keeps reading version 11's files, no matter what writers do. Time travel is just replaying fewer commits. Undoing a bad write would be a commit that puts the old files back.</p>
+<p>Replaying from zero gets slow on a long-lived table, so every 10 commits a writer also saves a checkpoint, which is the full list of live files at that point. Loading a snapshot then means reading one checkpoint and at most nine commits. The checkpoint is purely a cache, and one of the tests deletes the checkpoints and checks that a full replay gives exactly the same file list.</p>
+
+<h2>One storage primitive</h2>
+<p>For this to be a transaction, two writers must never both create commit number 13. The only thing the log needs from storage is "create this file only if it doesn't exist yet." Object stores offer that as a conditional PUT. On a local disk I write the commit to a temp file and then <code>os.link()</code> it into place, which fails if the name is taken. A reader can never see a half-written commit, because the file only appears once it's complete.</p>
+
+<h2>Writers that don't lock</h2>
+<p>Nothing is locked while a writer works. A transaction reads the latest version, writes all its new Parquet files, and only then tries to create the next commit. If someone else got there first, it reads their commit and asks whether its own change still makes sense on top:</p>
+<ul>
+<li>If the other writer changed the schema, stop.</li>
+<li>If the other writer removed a file this transaction read or meant to remove, stop. That's two deletes hitting the same rows, or a delete racing a compaction that rewrote the files it was working from.</li>
+<li>If the other writer only added files, there's no problem. Try the next commit number. Nothing gets redone, because the new Parquet files are already written.</li>
+</ul>
+<p>That last rule is why appends scale. Two appends never conflict, so the loser just takes the next number. The test I trust most starts 8 separate processes making 120 commits between them, then checks that the table ends at version 120 with every row present exactly once.</p>
+<p>These rules are a simplified version of Delta's WriteSerializable isolation, and they have a consequence worth knowing. If a delete loses a race to an append, the delete is ordered after it and doesn't see the appended rows, so those rows survive the delete. There's a test that pins that down, because it's exactly the kind of behavior that surprises someone later.</p>
+
+<h2>Skipping files you don't need</h2>
+<p>Since every add action stores per-column min and max, a query can throw files away before opening them. If a file's <code>x</code> values run from 400,000 to 410,000, a query for <code>x &lt; 100,000</code> never reads it. Whether that helps depends entirely on how rows are laid out across files, which is what the benchmark measures.</p>
+<p>It writes 2 million rows with random <code>x</code> and <code>y</code> into 200 files, then rewrites the table twice: once sorted by <code>x</code>, once in Z-order on <code>(x, y)</code>. Z-order interleaves the bits of both columns, so rows that are close in both end up near each other. Thanks to time travel, all three layouts stay readable from the same table, so the same 50 random queries run against each. Each query's range covers 1% of the column.</p>
+<div class="table-wrap"><table>
+<tr><th>Layout</th><th>Filter on x</th><th>Filter on y</th><th>Filter on both</th></tr>
+<tr><td>arrival order</td><td>200 files, 65 ms</td><td>200 files, 66 ms</td><td>200 files, 69 ms</td></tr>
+<tr><td>sorted by x</td><td>3 files, 2.7 ms</td><td>200 files, 66 ms</td><td>3 files, 2.2 ms</td></tr>
+<tr><td>Z-order (x, y)</td><td>31 files, 12 ms</td><td>21 files, 8.4 ms</td><td>3.2 files, 2.7 ms</td></tr>
+</table></div>
+<p>In arrival order, every file covers nearly the whole range of every column, so stats skip nothing and every query reads all 200 files. Sorting by <code>x</code> is perfect for queries on <code>x</code>, about 25 times faster, and useless for queries on <code>y</code>. Z-order gives up part of the <code>x</code> win (31 files instead of 3) to make <code>y</code> queries 10 times cheaper too.</p>
+<p>The result I didn't expect was the last column. I assumed Z-order would win clearly when filtering on both columns, and it didn't. A 1% range on <code>x</code> alone already narrows a sorted table to 3 files, so there was nothing left to win. Z-order earns its keep when you don't know which column the next query will filter on, or when each filter on its own is too wide to prune much.</p>
+
+<h2>What it leaves out</h2>
+<p>A lot. There's no partitioning, no schema evolution, no MERGE, and no deletion vectors, so a delete that touches one row still rewrites the whole file. Stats are only min and max. Everything lives on one local filesystem. The commit protocol only needs put-if-absent, which S3 now supports, but there's no object store backend.</p>
+<p>The piece I'd add next is deletion vectors. Copy-on-write deletes are simple and correct, but rewriting a 100 MB file to drop one row is the obvious cost in this design, and marking deleted rows in a small side file is how Delta avoids it.</p>
+<p>The code, tests, and benchmark are on <a href="https://github.com/AkhilBod/tinylake" target="_blank" rel="noopener">GitHub</a>. It needs only <code>pyarrow</code> and <code>numpy</code>, and <code>pytest</code> runs all 22 tests in a few seconds.</p>
+            </article>
+        </main>
+        <footer class="site-footer">
+            <span>&copy; 2026 Akhil Bodahanapati</span>
+            <nav>
+                <a href="https://github.com/AkhilBod" target="_blank" rel="noopener">GitHub</a>
+                <a href="https://linkedin.com/in/akhil-bod" target="_blank" rel="noopener">LinkedIn</a>
+                <a href="mailto:akkiisan9@gmail.com">Email</a>
+            </nav>
+        </footer>
+    </div>
+    <script src="/site.js"></script>
+    
+</body>
+</html>

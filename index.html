@@ -8,14 +8,15 @@
     <script>try{if(localStorage.getItem('theme')==='white')document.documentElement.setAttribute('data-theme','white')}catch(e){}</script>
     <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/site.css">
-    <link rel="stylesheet" href="/intro.css">
+    <!-- Finder intro turned off for now; restore this line, the intro.js tag, and remove "hidden" on #finder-intro to bring it back -->
+    <!-- <link rel="stylesheet" href="/intro.css"> -->
     <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-8PGT98XQTN"></script>
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-8PGT98XQTN');</script>
 </head>
 <body>
         <!-- macOS Finder Intro -->
-    <div id="finder-intro" class="finder-intro-overlay" aria-label="Open portfolio desktop">
+    <div id="finder-intro" class="finder-intro-overlay" aria-label="Open portfolio desktop" hidden>
         <button class="desktop-folder" id="akhil-folder" type="button" aria-label="Open akhil folder">
             <img src="assets/images/macos-folder.png" alt="" class="folder-icon" aria-hidden="true">
             <span class="folder-label">akhil/</span>
@@ -107,6 +108,7 @@
 
             <div class="label">Writing</div>
             <ul class="rows">
+<li><a class="row" href="/writing/tinylake.html"><div class="row-main"><div class="row-title">How a lakehouse table works, built small</div><div class="row-sub">A transaction log, optimistic writers, and why file layout decides what a query reads</div></div><div class="row-meta">Oct 2026</div></a></li>
 <li><a class="row" href="/writing/fleet-dispatch.html"><div class="row-main"><div class="row-title">Building a robotaxi dispatcher from scratch</div><div class="row-sub">Greedy matching, batched assignment, and why idle cars should move</div></div><div class="row-meta">Oct 2026</div></a></li>
 <li><a class="row" href="/writing/webcam-hand-tracking.html"><div class="row-main"><div class="row-title">Aiming with a finger: hand tracking from one webcam</div><div class="row-sub">What made webcam aiming feel good at SteelHacks</div></div><div class="row-meta">Sep 2026</div></a></li>
 </ul>
@@ -121,6 +123,6 @@
         </footer>
     </div>
     <script src="/site.js"></script>
-    <script src="/intro.js"></script>
+    <!-- <script src="/intro.js"></script> -->
 </body>
 </html>
