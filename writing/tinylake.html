@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>How a lakehouse table works, built small | Akhil Bodahanapati</title>
+    <title>Two writers, one table, no locks | Akhil Bodahanapati</title>
     <meta name="description" content="Building a small Delta-Lake-style table format in Python: a transaction log, optimistic concurrency, time travel, and Z-order data skipping.">
     <script>try{if(localStorage.getItem('theme')==='white')document.documentElement.setAttribute('data-theme','white')}catch(e){}</script>
     <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -28,46 +28,47 @@
         </header>
         <main>
             <a class="back" href="/writing.html">&larr; Writing</a>
-            <h1>How a lakehouse table works, built small</h1>
+            <h1>Two writers, one table, no locks</h1>
             <div class="meta-line">Oct 2026 · Python · <a class="inline-link" href="https://github.com/AkhilBod/tinylake" target="_blank" rel="noopener">github.com/AkhilBod/tinylake</a></div>
             <article class="prose">
-<p>Formats like Delta Lake turn a folder of Parquet files into something that behaves like a database table. You get transactions, several writers at once, and the ability to read the table as it was last Tuesday. I had used that from the outside but couldn't have explained how a pile of immutable files pulls it off. So I built a small version, about 840 lines of Python including tests, to find out.</p>
-<p>The short answer is that almost everything comes from one idea: the table isn't the files, it's a log of which files count.</p>
+<p>This summer at Nutanix I spent a good chunk of time on one bug. Two partial updates to the same cluster could land at once, and one would quietly wipe out the other. Customer configs, just gone. I rewrote the update logic so concurrent writes stopped stepping on each other.</p>
+<p>A year before that I'd won a hackathon at Federated Hermes with a backtester that ran on Databricks. The tables were Delta tables by default and I treated them like magic. I never once thought about what happens when two jobs write to one.</p>
+<p>After Nutanix I started wondering. Delta tables are just Parquet files in a folder, and Parquet files can't be edited. So where do the transactions come from? I built a tiny version to find out. It's about 840 lines of Python with the tests.</p>
 
-<h2>The log is the table</h2>
-<p>A table is a directory of Parquet files plus a <code>_log/</code> folder. Each commit is one numbered JSON file, and each line in it is an action: this file was added (with its row count and the min and max of every column), this file was removed, the schema is now this. To find out what version 12 of the table contains, replay commits 0 through 12 and see which files are left.</p>
-<p>Data files are never edited. A delete reads the files that hold matching rows, writes new files without those rows, and commits "remove the old ones, add the new ones" as one action list. That one choice gives you a lot for free. A reader that loaded version 11 keeps reading version 11's files, no matter what writers do. Time travel is just replaying fewer commits. Undoing a bad write would be a commit that puts the old files back.</p>
-<p>Replaying from zero gets slow on a long-lived table, so every 10 commits a writer also saves a checkpoint, which is the full list of live files at that point. Loading a snapshot then means reading one checkpoint and at most nine commits. The checkpoint is purely a cache, and one of the tests deletes the checkpoints and checks that a full replay gives exactly the same file list.</p>
+<h2>A folder and a diary</h2>
+<p>The whole thing hangs off a <code>_log/</code> folder that sits next to the data. Every commit is one numbered JSON file. Each line says something like "added this file, here's the min and max of every column" or "removed that file." To get version 12 you replay commits 0 through 12 and see which files survive.</p>
+<p>Data files are never touched after they're written. A delete reads the files with matching rows, writes new copies without them, and commits "remove these, add those" in one go. The old files stick around, so reading last week's version means replaying fewer commits. I expected time travel to be a big feature. In the code it's an optional <code>version</code> argument.</p>
+<p>Replaying from zero every time gets slow, so every 10th commit also saves a checkpoint with the full file list. Loading any version is then one checkpoint plus at most 9 commits. Checkpoints are only a cache, and one test deletes them all and makes sure the table comes back identical.</p>
 
-<h2>One storage primitive</h2>
-<p>For this to be a transaction, two writers must never both create commit number 13. The only thing the log needs from storage is "create this file only if it doesn't exist yet." Object stores offer that as a conditional PUT. On a local disk I write the commit to a temp file and then <code>os.link()</code> it into place, which fails if the name is taken. A reader can never see a half-written commit, because the file only appears once it's complete.</p>
+<h2>Who gets commit 13</h2>
+<p>Everything depends on one rule: two writers can't both create commit 13. Storage has to give you "create this file only if it doesn't exist." S3 does that with a conditional PUT. On my laptop I write the commit to a temp file and <code>os.link()</code> it into place, which fails if the name is taken. Readers also never see a half-written commit, because the file only shows up once it's complete.</p>
 
-<h2>Writers that don't lock</h2>
-<p>Nothing is locked while a writer works. A transaction reads the latest version, writes all its new Parquet files, and only then tries to create the next commit. If someone else got there first, it reads their commit and asks whether its own change still makes sense on top:</p>
+<h2>The Nutanix bug, again</h2>
+<p>This is the part I actually came for. A writer reads the latest version, does all its work, and only then tries to grab the next commit number. If someone beat it there, it reads the winner's commit and decides whether it can still go:</p>
 <ul>
-<li>If the other writer changed the schema, stop.</li>
-<li>If the other writer removed a file this transaction read or meant to remove, stop. That's two deletes hitting the same rows, or a delete racing a compaction that rewrote the files it was working from.</li>
-<li>If the other writer only added files, there's no problem. Try the next commit number. Nothing gets redone, because the new Parquet files are already written.</li>
+<li>Winner changed the schema: give up.</li>
+<li>Winner removed a file this writer read or planned to remove: give up. Two deletes on the same rows, or a delete racing a compaction, end up here.</li>
+<li>Winner only added files: no problem. Take the next number and go. The Parquet files are already on disk, so nothing gets redone.</li>
 </ul>
-<p>That last rule is why appends scale. Two appends never conflict, so the loser just takes the next number. The test I trust most starts 8 separate processes making 120 commits between them, then checks that the table ends at version 120 with every row present exactly once.</p>
-<p>These rules are a simplified version of Delta's WriteSerializable isolation, and they have a consequence worth knowing. If a delete loses a race to an append, the delete is ordered after it and doesn't see the appended rows, so those rows survive the delete. There's a test that pins that down, because it's exactly the kind of behavior that surprises someone later.</p>
+<p>The second rule is my config bug in a different costume. A writer working off stale data has to find out before it commits. Here it finds out by checking exactly which files the other writer removed. The third rule is why appends scale. Two appends never step on each other. One test starts 8 processes making 120 commits at once and checks that the table ends at version 120 with every row there exactly once.</p>
+<p>Delta calls this WriteSerializable, and mine is a stripped-down copy. It has one side effect that surprised me. If a delete loses a race to an append, the delete lands after it in the log but never saw the new rows, so they survive the delete. Delta works the same way on purpose. I wrote a test for it so future me doesn't file it as a bug.</p>
 
-<h2>Skipping files you don't need</h2>
-<p>Since every add action stores per-column min and max, a query can throw files away before opening them. If a file's <code>x</code> values run from 400,000 to 410,000, a query for <code>x &lt; 100,000</code> never reads it. Whether that helps depends entirely on how rows are laid out across files, which is what the benchmark measures.</p>
-<p>It writes 2 million rows with random <code>x</code> and <code>y</code> into 200 files, then rewrites the table twice: once sorted by <code>x</code>, once in Z-order on <code>(x, y)</code>. Z-order interleaves the bits of both columns, so rows that are close in both end up near each other. Thanks to time travel, all three layouts stay readable from the same table, so the same 50 random queries run against each. Each query's range covers 1% of the column.</p>
+<h2>Reading less</h2>
+<p>Since every file records min and max per column, a query can throw files away without opening them. A file whose <code>x</code> runs from 400,000 to 410,000 can't match <code>x &lt; 100,000</code>. How much that buys you depends on how rows are spread across files, so I measured it.</p>
+<p>I wrote 2 million rows with random <code>x</code> and <code>y</code> into 200 files, then rewrote them sorted by <code>x</code>, then Z-ordered on <code>(x, y)</code>. Z-order interleaves the bits of both columns so rows that are close in both land in the same file. Time travel keeps all three layouts readable from one table, so the same 50 queries ran against each. Every range covers 1% of its column.</p>
 <div class="table-wrap"><table>
 <tr><th>Layout</th><th>Filter on x</th><th>Filter on y</th><th>Filter on both</th></tr>
 <tr><td>arrival order</td><td>200 files, 65 ms</td><td>200 files, 66 ms</td><td>200 files, 69 ms</td></tr>
 <tr><td>sorted by x</td><td>3 files, 2.7 ms</td><td>200 files, 66 ms</td><td>3 files, 2.2 ms</td></tr>
 <tr><td>Z-order (x, y)</td><td>31 files, 12 ms</td><td>21 files, 8.4 ms</td><td>3.2 files, 2.7 ms</td></tr>
 </table></div>
-<p>In arrival order, every file covers nearly the whole range of every column, so stats skip nothing and every query reads all 200 files. Sorting by <code>x</code> is perfect for queries on <code>x</code>, about 25 times faster, and useless for queries on <code>y</code>. Z-order gives up part of the <code>x</code> win (31 files instead of 3) to make <code>y</code> queries 10 times cheaper too.</p>
-<p>The result I didn't expect was the last column. I assumed Z-order would win clearly when filtering on both columns, and it didn't. A 1% range on <code>x</code> alone already narrows a sorted table to 3 files, so there was nothing left to win. Z-order earns its keep when you don't know which column the next query will filter on, or when each filter on its own is too wide to prune much.</p>
+<p>In arrival order every file holds a bit of everything, so the stats skip nothing. Sorting by <code>x</code> makes <code>x</code> queries 25x faster and does nothing for <code>y</code>. Z-order splits the difference: a lot worse than the sort on <code>x</code>, 10x better on <code>y</code>.</p>
+<p>I got the last column wrong. I was sure Z-order would win big on queries that filter both columns, and it tied. A 1% range on <code>x</code> already narrows a sorted table to 3 files, so there was nothing left to take. Z-order pays off when you don't know which column the next query will filter on.</p>
 
-<h2>What it leaves out</h2>
-<p>A lot. There's no partitioning, no schema evolution, no MERGE, and no deletion vectors, so a delete that touches one row still rewrites the whole file. Stats are only min and max. Everything lives on one local filesystem. The commit protocol only needs put-if-absent, which S3 now supports, but there's no object store backend.</p>
-<p>The piece I'd add next is deletion vectors. Copy-on-write deletes are simple and correct, but rewriting a 100 MB file to drop one row is the obvious cost in this design, and marking deleted rows in a small side file is how Delta avoids it.</p>
-<p>The code, tests, and benchmark are on <a href="https://github.com/AkhilBod/tinylake" target="_blank" rel="noopener">GitHub</a>. It needs only <code>pyarrow</code> and <code>numpy</code>, and <code>pytest</code> runs all 22 tests in a few seconds.</p>
+<h2>What I'd build next</h2>
+<p>There's no partitioning, no schema changes, no MERGE, and the only stats are min and max. It all lives on one disk.</p>
+<p>Deletes bother me most. Dropping one row rewrites the entire file. Delta fixes that with deletion vectors, a small side file that marks which rows are dead, and that's next on my list.</p>
+<p>Code and tests are on <a href="https://github.com/AkhilBod/tinylake" target="_blank" rel="noopener">GitHub</a>. It only needs <code>pyarrow</code> and <code>numpy</code>, and <code>pytest</code> runs all 22 tests in a couple of seconds.</p>
             </article>
         </main>
         <footer class="site-footer">
