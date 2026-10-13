@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trying to never lose at rock paper scissors | Akhil Bodahanapati</title>
-    <meta name="description" content="A webcam that reads your hand before you finish throwing, and what happened when I tried to use it to win myself.">
+    <title>Trying to never lose at rock, paper, scissors | Akhil Bodahanapati</title>
+    <meta name="description" content="From a scene in The Mentalist to a webcam that reads your hand before you finish throwing, and what happened when I tried to use it to win.">
     <script>try{if(localStorage.getItem('theme')==='white')document.documentElement.setAttribute('data-theme','white')}catch(e){}</script>
     <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/site.css">
@@ -28,51 +28,47 @@
         </header>
         <main>
             <a class="back" href="/writing.html">&larr; Writing</a>
-            <h1>Trying to never lose at rock paper scissors</h1>
+            <h1>Trying to never lose at rock, paper, scissors</h1>
             <div class="meta-line">Sep 2026 · Tell · webcam hand tracking</div>
             <article class="prose">
-<p>I was scrolling Instagram and landed on <a href="https://www.instagram.com/reel/DcW3FN4tyTb/" target="_blank" rel="noopener">a mentalist reel</a> where the guy would not lose at rock paper scissors, aura farming the whole time. A little later I found a <a href="https://youtube.com/shorts/LaW-xXgndzo" target="_blank" rel="noopener">Zack D. Films short</a> about a robot in Japan that always wins. It doesn't read minds. It sees your hand start to form a shape and answers faster than you can finish it.</p>
-<p>I wanted that for my apartment. The plan was to put my laptop on the table, call it the judge, and quietly never lose to my roommates. I'd been doing a lot of computer vision lately, so it seemed doable. It took four versions to get something that actually helps me win.</p>
+<p>I was scrolling through reels when I came across <a href="https://www.instagram.com/reel/DcW3FN4tyTb/" target="_blank" rel="noopener">a clip from <em>The Mentalist</em></a> where Patrick Jane, Simon Baker's character, plays rock, paper, scissors and simply doesn't lose. He reads the other person, knows what they're about to throw, and beats it every time.</p>
+<p>It's a TV show, so of course he doesn't lose. But it made me wonder how close a computer could get. I had just used webcam hand tracking for a hackathon game, so I had the tools, and I had a goal: convince my roommates that I couldn't lose either.</p>
 
-<h2>Try 1: guess from habits</h2>
-<p>Before touching the camera I built something that only looks at what you've thrown before. People are bad at being random. They have a favorite, they repeat after a win, they switch after a loss, and they fall into little sequences without noticing.</p>
-<p>The model runs twelve small predictors over the history: your favorite lately, what usually follows your last throw or your last two, what you do after losing, whether a recent run of throws has happened before, and a few that assume you're watching it and countering its habits. Each guess also gets tried shifted by one and by two, for the player who is one step ahead of the obvious read. That's 36 guesses a round. Every one of them gets scored every round, recent rounds count more, and it throws against whichever has the best record lately.</p>
-<p>Against scripted bots it was close to perfect. Always-Rock, cycling through the three, win-stay lose-shift: they all lost at least 96% of rounds. Against a bot throwing truly at random it won 34%, which is right, because nothing beats random on average. Later, playing against me, it called my throw in 10 of 16 rounds where it had nothing else to go on, where chance would get you about 5. Real odds, but it still lost a lot, and the guy in the reel doesn't lose a lot.</p>
+<h2>The first version: reading habits</h2>
+<p>My first idea was the one Jane would use. People think they're random at rock, paper, scissors, but they aren't. Most have a favorite throw, many stick with a throw after it wins and switch after it loses, and plenty fall into patterns without noticing.</p>
+<p>So the first version only looked at history. It tracked about three dozen of these tendencies at once, scored each one on how well it had predicted recent rounds, and played against whichever was working best.</p>
+<p>Against bots that followed a fixed pattern, it almost never lost. Against me, it called my throw about 10 times in 16. That's well above chance, but it still got me wrong six times, which is nowhere near Patrick Jane.</p>
 
-<h2>Try 2: read the hand</h2>
-<p>The robot doesn't guess, it looks. So the next version watches the webcam with MediaPipe, which gives 21 points on your hand every frame. From those I work out how straight each finger is, from 0 (curled into the palm) to 100 (all the way out). Rock is all four low, Paper is all four high, Scissors is index and middle high with ring and pinky low.</p>
-<p>The first version waited until my fingers started to move, then countered. It basically couldn't lose. It was also obviously cheating, because its throw showed up after mine. If a person did that you'd call it out right away.</p>
-<p>So I gave it a rule. It throws exactly on "Shoot", the same instant you do, and it can only use camera frames it already processed before that moment. The camera runs at 30 frames a second with about 22 ms of delay, so the last frame it gets is from roughly 30 ms before Shoot. Whatever your hand gave away by then is all it has. If your hand gave nothing away, it falls back to the habit model.</p>
-<p>That fair version played me for 53 rounds and went 27 wins, 17 draws and 9 losses, so it took 75% of the rounds that weren't draws. When my hand started opening before Shoot the reads were good: Paper right 7 of 8 times, Scissors 5 of 7.</p>
-<p>The bugs were the fun part. My fist is a little loose going into the last beat and squeezes tight as I pump, and it read that squeeze as "heading toward Rock." It made that call 8 times and was right once. And holding Paper still through the whole countdown, then switching on Shoot, beat it, because it took the held shape as a tell. I fixed both by only counting movement away from whatever pose you're holding, and by remembering what you actually throw after you hold a shape still.</p>
-<p>Every round got recorded with its camera frames and finger values, and the decision code never touches the camera itself, so I could replay old rounds through new code before playing again. The same rounds replayed after the fixes went 30-15-8.</p>
+<h2>A robot that doesn't guess</h2>
+<p>While looking for a better approach, I came across a <a href="https://youtube.com/shorts/LaW-xXgndzo" target="_blank" rel="noopener">Zack D. Films video</a> about a robot built in Japan that always wins at rock, paper, scissors. It doesn't predict anything. It watches your hand with a high-speed camera, sees which shape your fingers are starting to form, and answers before you've finished.</p>
+<p>That changed the question. Instead of guessing what someone would throw, I could watch them throw it.</p>
 
-<h2>Try 3: make it help me</h2>
-<p>A computer beating me is a decent demo, but the prank needs me to win. So I flipped it. The laptop watches my opponent's hand and tells me what to throw.</p>
-<p>To test it without dragging a roommate in, I recorded a batch of clips of myself as the opponent, throwing whatever I felt like on Shoot. The app plays one at random in sync with the countdown and reads the hand in it frame by frame, the same way it would read a person. My first cues were three sounds, a thud, a swish and a snip. I could not remember which was which, so I switched to a voice saying the letter. That went badly too, because macOS reads a capital "P" out loud as "capital P." Saying that takes 0.57 seconds, and the letter you actually need comes last. A lowercase "p" takes 0.2.</p>
-<p>The real problem was me. From hearing the cue to my fingers moving took 287 ms (median), plus roughly another 90 ms to actually form the shape. And the opponent's hand gives itself away late. Paper is the easy one, since four fingers opening is a big movement, and the camera usually caught it right around Shoot, sometimes 200 ms early. Scissors didn't show until about 120 ms after Shoot, and Rock, being a fist that just stays a fist, not until about 200 ms after. By the time I heard anything, everyone had already thrown.</p>
-<p>It also flip-flopped. A hand opening into Paper pushes the index and middle fingers out first, so for a moment it looks exactly like Scissors. In 10 of 62 rounds I heard one letter and then a different one.</p>
-<p>Over those rounds I went 24 wins, 19 draws and 17 losses. Then I looked closer, and 13 of the 24 wins were just my resting fist happening to beat Scissors. The reacting part was barely doing anything.</p>
+<h2>Watching the hand</h2>
+<p>The second version used my laptop webcam and MediaPipe, which tracks 21 points on a hand in every frame. From those points it measures how far each finger is extended, which is enough to tell a fist from an open hand from two fingers out. More importantly, it catches the movement in between. If your fingers start opening on the way down, they're usually heading toward the shape you're about to throw.</p>
+<p>The first attempt waited until it saw my fingers move and then picked its counter. It almost never lost, but only because its throw landed after mine, which is cheating. So I held it to the same rule as a person: it throws exactly on "Shoot," using only what it had seen before that moment.</p>
+<p>Played fairly, it still won three of every four games that didn't end in a draw. Getting there took some tuning, which I did by recording every game and replaying old rounds through each change.</p>
 
-<h2>What actually worked</h2>
-<p>Two changes fixed it, and neither one asks me to be faster.</p>
-<p>First, hold a fist by default. A fist already beats Scissors and ties Rock, so the only throw that can beat you is Paper, and Paper happens to be the one the camera sees earliest. Now there's a single cue, "s" for Scissors, and a single thing to do when you hear it. That's quicker than choosing between three. It also commits to its first read and never changes its mind mid-round.</p>
-<p>Second, bring back the habit model, but use it before the countdown starts. If the opponent's recent throws show a favorite that's stronger than chance (under a 5% chance it's luck), I hear its counter about 1.2 seconds before Shoot, which is plenty of time. If there's no real favorite it stays quiet and I keep the fist. Either way it's one letter a round at most.</p>
-<p>Against my own recorded throws, which turned out to lean hard on Paper, a live session went 12 wins, 2 draws and 5 losses. Replaying all 62 earlier rounds through it gave 34 wins, 23 draws and 5 losses, so 87% of the rounds that weren't draws.</p>
-<p>I didn't fully trust that, because most of it is the habit model punishing how much I like Paper. A fair test needs an opponent with nothing to learn. So the app makes one. Each round it picks Rock, Paper or Scissors with the browser's cryptographic random number generator, then throws it with one of my real recorded hands for that throw, up to 120 ms early or late and up to 10% faster or slower. I only had 6 real Rocks, so it makes more by taking a Paper or Scissors clip, keeping the pump, and freezing on the clearest fist right before the fingers open.</p>
-<p>Over 10,000 simulated rounds against that opponent:</p>
+<h2>Turning it around</h2>
+<p>Beating me was a good demo, but the point was for me to win. So I turned it around: the laptop would watch my opponent's hand and quietly tell me what to throw, as a spoken letter in one earbud.</p>
+<p>To practice without a second person, I recorded clips of myself playing as the opponent and had the app play them back in sync with the countdown, reading each one the same way it would read a live hand.</p>
+<p>That's where the plan ran into me. It took me about 290 ms to react to a cue, and an opponent's hand gives very little away until right around Shoot. Paper, with four fingers opening at once, usually showed up around Shoot. Scissors and Rock didn't become clear until after it. Either way, by the time I heard the letter and moved, the round was over. When I looked back at my wins, more than half came from my resting fist happening to beat Scissors. The cues were barely helping.</p>
+
+<h2>What finally worked</h2>
+<p>The fix was to stop relying on fast reactions. If I hold a fist by default, I already beat Scissors and tie Rock. The only throw that can beat me is Paper, which is also the one the camera sees first. So during a round the coach only ever says one thing: "s," for Scissors, when it sees Paper coming.</p>
+<p>I also brought the first version back, but moved it earlier. If an opponent has a favorite throw that's stronger than chance, the coach tells me the counter about a second before Shoot, while the countdown is still going and there's time to act on it.</p>
+<p>Against my own recorded throws, which leaned heavily on Paper, the combined approach won 12 rounds, drew 2 and lost 5. That flatters it, since much of the gain came from exploiting my habits. So I also tested it against a generated opponent that picks every throw at random and performs it with one of my real recorded hands. Over 10,000 simulated rounds:</p>
 <div class="table-wrap"><table>
 <tr><th>Strategy</th><th>Win</th><th>Draw</th><th>Loss</th></tr>
 <tr><td>Hold a fist, no help</td><td>33.5%</td><td>32.7%</td><td>33.8%</td></tr>
 <tr><td>Fist plus the "s" cue, at my reaction speed</td><td>37.7%</td><td>34.4%</td><td>27.9%</td></tr>
 <tr><td>Same, for someone who reacts in 200 ms</td><td>42.8%</td><td>35.9%</td><td>21.3%</td></tr>
 </table></div>
-<p>The first row is the sanity check. Against real randomness nothing wins more than a third. At my speed the cue turns about a sixth of the losses into wins, and a faster person gets more. Against an actual person, who is never truly random, the habit model adds a lot on top of that.</p>
+<p>Against true randomness, nothing wins more than a third of the time, which is what the first row shows. The cue turns some of my losses into wins, and someone with faster reactions would get more. Real people are never truly random, so in a real game the habit model adds to that.</p>
 
-<h2>What's left</h2>
-<p>The roommate test. The laptop goes on the table in a judge view that only shows the countdown and the score, with the cue in one earbud or as a tiny letter in the corner of the screen. The camera sees both hands, and I tell it which side my opponent is on.</p>
-<p>What I didn't expect going in is that the vision was never the bottleneck. It caught nearly every Paper, usually within a few dozen milliseconds of Shoot, and almost never called Paper when it wasn't. The bottleneck is the human in the loop. The robot in that short never loses because it doesn't have a 290 ms reaction time. I do, so the version that works leans on people being predictable and only asks me to react when there's time to.</p>
-<p>The code is on <a href="https://github.com/AkhilBod/tell" target="_blank" rel="noopener">GitHub</a>. It runs in Chrome with <code>npm start</code>, and the replay scripts that every threshold above came from are in there too.</p>
+<h2>What's next</h2>
+<p>The real test is my roommates. The plan is to set the laptop on the table in a judge view that shows only the countdown and the score, with the cue in one earbud.</p>
+<p>What surprised me most was where the limit ended up. The camera did its job, catching nearly every Paper with almost no false alarms. The limit was me. The robot in that video always wins because it reacts in milliseconds. I can't, so the version that works leans on people being predictable and only asks me to react when there's time to.</p>
+<p>The code is on <a href="https://github.com/AkhilBod/tell" target="_blank" rel="noopener">GitHub</a>. It runs in Chrome with <code>npm start</code>.</p>
             </article>
         </main>
         <footer class="site-footer">
