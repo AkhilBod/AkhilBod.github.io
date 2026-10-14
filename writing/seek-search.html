@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My movie search app wasn't using its own vector index | Akhil Bodahanapati</title>
-    <meta name="description" content="Benchmarking Seek, a natural-language search engine over the Netflix catalog, and what the numbers said about vector vs keyword search.">
+    <title>Finding a movie when you can't remember what it's called | Akhil Bodahanapati</title>
+    <meta name="description" content="Fixing Seek, a search box for Netflix where you describe a movie instead of naming it.">
     <script>try{if(localStorage.getItem('theme')==='white')document.documentElement.setAttribute('data-theme','white')}catch(e){}</script>
     <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/site.css">
@@ -28,25 +28,40 @@
         </header>
         <main>
             <a class="back" href="/writing.html">&larr; Writing</a>
-            <h1>My movie search app wasn't using its own vector index</h1>
-            <div class="meta-line">Oct 2026 · Python, Postgres · <a class="inline-link" href="https://github.com/AkhilBod/Seek" target="_blank" rel="noopener">github.com/AkhilBod/Seek</a></div>
+            <h1>Finding a movie when you can't remember what it's called</h1>
+            <div class="meta-line">Oct 2026 · <a class="inline-link" href="https://github.com/AkhilBod/Seek" target="_blank" rel="noopener">github.com/AkhilBod/Seek</a></div>
             <article class="prose">
-<p>Back in June I built Seek, a search box for the Netflix catalog where you describe what you're in the mood for instead of typing a title. The example on the landing page is "dark funny revenge movie." I came back to it recently, typed that exact query, and got a wall of horror movies about revenge. Nothing funny anywhere on the page.</p>
-<p>My first guess was that the embeddings were bad. They weren't. When I actually read the retrieval code, it turned out the app had never used its vector index to find anything. It grabbed up to 600 titles whose text contained one of the words in your query, sorted those by release year, and only then compared embeddings, in Python, on whatever came back. If a movie matched what you meant but didn't share a word with what you typed, it was never even in the running. There wasn't a vector index on the table at all. I had written "pgvector" in the README and believed it.</p>
-<p>Before changing anything I wanted a way to tell whether a change was actually better, because "the results look better to me" is how I ended up here in the first place. Mood queries don't have one right answer, so I tested something that does. I picked 300 titles at random and had a language model write the kind of half-remembered query a person types when they can't think of the name, like "anime about high school basketball and unrequited love." Then I checked where each version of the search ranked the title the query came from.</p>
-<p>The model needed babysitting. A lot of its first attempts slipped in a character's name or a word from the title, which would make the test trivially easy, so I filtered out any query that contained either. That threw away 96 of them. I'm glad I checked before trusting the batch.</p>
-<p>The old pipeline put the right title in the top 10 only 20% of the time. Searching the vector index directly, with nothing else, got 73%, and it was about seven times faster because the database was doing the work instead of Python.</p>
+<p>If you've ever tried to find a movie by describing it, you know how it goes. You remember it was about a chef who loses his restaurant, or two brothers on a road trip, but the name is gone. Type that into Netflix and you get nothing useful, because search there mostly matches titles and names.</p>
+<p>Over the summer I built Seek to fix that for myself. It's a search box for the Netflix catalog where you describe the thing instead of naming it. It seemed to work. Then this fall I came back to it, searched for movies I knew were in the catalog, and a lot of them just didn't show up.</p>
+
+<h2>Looking under the hood</h2>
+<p>Seek stores a kind of fingerprint for every title, a long list of numbers that captures what the movie is about, so it can match a description by meaning instead of exact words. That was the whole point of the project.</p>
+<p>When I read through the search code, I found it barely used them. It first grabbed a few hundred titles that shared a word with what you typed, and only then looked at meaning. So if your description didn't happen to use the same words as Netflix's summary, the right movie never even made the shortlist. I had been describing the project as "search by meaning" for months, and it mostly wasn't.</p>
+
+<h2>Grading a search engine</h2>
+<p>Before fixing anything, I wanted a way to tell if a change actually helped, because "this looks better to me" is how I missed the problem in the first place.</p>
+<p>So I made a test. I picked 300 titles at random and had an AI describe each one the way a person half remembers it, without the name. One came back as "anime about high school basketball and unrequited love." Then I searched for each description and checked whether the right title came back.</p>
+<p>The AI turned out to be a little too helpful. A lot of its descriptions slipped in a character's name or a word from the title, which basically gives away the answer. I threw those out, 96 of them, and kept the ones you'd have to solve from the plot alone.</p>
+<p>The old version found the right movie in its top 10 only about 1 time in 5.</p>
+
+<h2>Searching by meaning, for real</h2>
+<p>The fix was to let the database search the fingerprints directly instead of filtering by words first. That one change took it from 1 in 5 to almost 3 in 4, and searches got about five times faster, since the database was doing the work it's built for.</p>
+
+<h2>The part I got wrong</h2>
+<p>My next move seemed obvious. If matching by meaning is good, and matching exact words is good when someone types a title, combining both should be best. I was pretty sure about this one.</p>
+<p>It made things worse. Words like "love" and "family" show up in thousands of descriptions, so giving them an equal say pushed the right answer down the list.</p>
+<p>Words do still matter when you type the actual name, though. When I reran the test with people typing exact titles, word matching rescued a bunch of short or unusual titles that the fingerprints fumbled. So the version I kept mostly goes by meaning and gives exact words a small say.</p>
 <div class="table-wrap"><table>
-<tr><th>Version</th><th>Right title in top 10</th><th>Exact-title search, right title first</th><th>Median retrieval</th></tr>
-<tr><td>Old pipeline</td><td>20%</td><td>58%</td><td>412 ms</td></tr>
-<tr><td>Keywords only</td><td>11%</td><td>80%</td><td>12 ms</td></tr>
-<tr><td>Vectors only</td><td>73%</td><td>83%</td><td>62 ms</td></tr>
-<tr><td>Vectors + keywords, equal weight</td><td>63%</td><td>89%</td><td>72 ms</td></tr>
-<tr><td>Vectors + a little keyword (shipped)</td><td>73%</td><td>88%</td><td>76 ms</td></tr>
+<tr><th>Version</th><th>Describe it: right movie in top 10</th><th>Type the name: right movie first</th></tr>
+<tr><td>Before</td><td>20%</td><td>58%</td></tr>
+<tr><td>Meaning and words, equal say</td><td>63%</td><td>89%</td></tr>
+<tr><td>Mostly meaning (what I kept)</td><td>73%</td><td>88%</td></tr>
 </table></div>
-<p>The part I got wrong was the obvious next step. Everything I'd read says hybrid search, combining vector results with keyword results, beats either one alone, so I expected that to be the winner. On the vague queries it was worse than vectors alone. Words like "love" and "family" show up in thousands of synopses, and giving those matches equal say dragged the right answer down the list.</p>
-<p>Keywords aren't useless, though. When I reran the test with people typing the exact title instead, keyword matching fixed a bunch of cases the vectors fumbled, mostly short or unusual titles. So the version I shipped mostly listens to the vectors and gives keyword matches a tenth of the weight. That keeps nearly all the gain on vague queries and gets the right title first 88% of the time when you type its name. I also dropped the hand-tuned scoring formula that used to sit on top, because the benchmark showed it was pushing good results down.</p>
-<p>There's a catch in my own test that I should be upfront about. The fake queries were written from the same synopses the embeddings were built from, which gives vectors a home-field advantage, and "dark funny revenge movie" still doesn't have a score. The fix for that is real queries from real people, which is the next thing I want to collect. The code, the benchmark, and both result tables are on <a href="https://github.com/AkhilBod/Seek" target="_blank" rel="noopener">GitHub</a> if you want to rerun it.</p>
+
+<h2>What's next</h2>
+<p>My test has a soft spot. The AI wrote its descriptions from the same summaries the fingerprints were made from, which makes matching by meaning look a bit better than it really is. And mood searches like "something funny but not dumb" don't have a single right answer, so they aren't graded at all.</p>
+<p>The real test is real people. Next I want to collect searches from friends, see which ones Seek gets wrong, and go from there.</p>
+<p>The code and the full test results are on <a href="https://github.com/AkhilBod/Seek" target="_blank" rel="noopener">GitHub</a>, and you can try it at <a href="https://tryseek.vercel.app" target="_blank" rel="noopener">tryseek.vercel.app</a>.</p>
             </article>
         </main>
         <footer class="site-footer">
