@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="black">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My movie search app wasn't using its own vector index | Akhil Bodahanapati</title>
+    <meta name="description" content="Benchmarking Seek, a natural-language search engine over the Netflix catalog, and what the numbers said about vector vs keyword search.">
+    <script>try{if(localStorage.getItem('theme')==='white')document.documentElement.setAttribute('data-theme','white')}catch(e){}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/site.css">
+    
+    <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8PGT98XQTN"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-8PGT98XQTN');</script>
+</head>
+<body>
+    
+    <div class="page">
+        <header class="site-header">
+            <a class="site-name" href="/">Akhil Bodahanapati</a>
+            <div class="header-right">
+                <nav class="tabs"><a href="/">Home</a><a href="/projects.html">Projects</a><a href="/writing.html" aria-current="page">Writing</a></nav>
+                <div class="theme-switch" role="group" aria-label="Theme">
+                    <button type="button" data-theme="black" aria-pressed="true">black</button>
+                    <button type="button" data-theme="white" aria-pressed="false">white</button>
+                </div>
+            </div>
+        </header>
+        <main>
+            <a class="back" href="/writing.html">&larr; Writing</a>
+            <h1>My movie search app wasn't using its own vector index</h1>
+            <div class="meta-line">Oct 2026 · Python, Postgres · <a class="inline-link" href="https://github.com/AkhilBod/Seek" target="_blank" rel="noopener">github.com/AkhilBod/Seek</a></div>
+            <article class="prose">
+<p>Back in June I built Seek, a search box for the Netflix catalog where you describe what you're in the mood for instead of typing a title. The example on the landing page is "dark funny revenge movie." I came back to it recently, typed that exact query, and got a wall of horror movies about revenge. Nothing funny anywhere on the page.</p>
+<p>My first guess was that the embeddings were bad. They weren't. When I actually read the retrieval code, it turned out the app had never used its vector index to find anything. It grabbed up to 600 titles whose text contained one of the words in your query, sorted those by release year, and only then compared embeddings, in Python, on whatever came back. If a movie matched what you meant but didn't share a word with what you typed, it was never even in the running. There wasn't a vector index on the table at all. I had written "pgvector" in the README and believed it.</p>
+<p>Before changing anything I wanted a way to tell whether a change was actually better, because "the results look better to me" is how I ended up here in the first place. Mood queries don't have one right answer, so I tested something that does. I picked 300 titles at random and had a language model write the kind of half-remembered query a person types when they can't think of the name, like "anime about high school basketball and unrequited love." Then I checked where each version of the search ranked the title the query came from.</p>
+<p>The model needed babysitting. A lot of its first attempts slipped in a character's name or a word from the title, which would make the test trivially easy, so I filtered out any query that contained either. That threw away 96 of them. I'm glad I checked before trusting the batch.</p>
+<p>The old pipeline put the right title in the top 10 only 20% of the time. Searching the vector index directly, with nothing else, got 73%, and it was about seven times faster because the database was doing the work instead of Python.</p>
+<div class="table-wrap"><table>
+<tr><th>Version</th><th>Right title in top 10</th><th>Exact-title search, right title first</th><th>Median retrieval</th></tr>
+<tr><td>Old pipeline</td><td>20%</td><td>58%</td><td>412 ms</td></tr>
+<tr><td>Keywords only</td><td>11%</td><td>80%</td><td>12 ms</td></tr>
+<tr><td>Vectors only</td><td>73%</td><td>83%</td><td>62 ms</td></tr>
+<tr><td>Vectors + keywords, equal weight</td><td>63%</td><td>89%</td><td>72 ms</td></tr>
+<tr><td>Vectors + a little keyword (shipped)</td><td>73%</td><td>88%</td><td>76 ms</td></tr>
+</table></div>
+<p>The part I got wrong was the obvious next step. Everything I'd read says hybrid search, combining vector results with keyword results, beats either one alone, so I expected that to be the winner. On the vague queries it was worse than vectors alone. Words like "love" and "family" show up in thousands of synopses, and giving those matches equal say dragged the right answer down the list.</p>
+<p>Keywords aren't useless, though. When I reran the test with people typing the exact title instead, keyword matching fixed a bunch of cases the vectors fumbled, mostly short or unusual titles. So the version I shipped mostly listens to the vectors and gives keyword matches a tenth of the weight. That keeps nearly all the gain on vague queries and gets the right title first 88% of the time when you type its name. I also dropped the hand-tuned scoring formula that used to sit on top, because the benchmark showed it was pushing good results down.</p>
+<p>There's a catch in my own test that I should be upfront about. The fake queries were written from the same synopses the embeddings were built from, which gives vectors a home-field advantage, and "dark funny revenge movie" still doesn't have a score. The fix for that is real queries from real people, which is the next thing I want to collect. The code, the benchmark, and both result tables are on <a href="https://github.com/AkhilBod/Seek" target="_blank" rel="noopener">GitHub</a> if you want to rerun it.</p>
+            </article>
+        </main>
+        <footer class="site-footer">
+            <span>&copy; 2026 Akhil Bodahanapati</span>
+            <nav>
+                <a href="https://github.com/AkhilBod" target="_blank" rel="noopener">GitHub</a>
+                <a href="https://linkedin.com/in/akhil-bod" target="_blank" rel="noopener">LinkedIn</a>
+                <a href="mailto:akkiisan9@gmail.com">Email</a>
+            </nav>
+        </footer>
+    </div>
+    <script src="/site.js"></script>
+    
+</body>
+</html>
