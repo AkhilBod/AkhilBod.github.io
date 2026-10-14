@@ -31,26 +31,26 @@
             <h1>Finding a movie when you can't remember what it's called</h1>
             <div class="meta-line">Oct 2026 · <a class="inline-link" href="https://github.com/AkhilBod/Seek" target="_blank" rel="noopener">github.com/AkhilBod/Seek</a></div>
             <article class="prose">
-<p>If you've ever tried to find a movie by describing it, you know how it goes. You remember it was about a chef who loses his restaurant, or two brothers on a road trip, but the name is gone. Type that into Netflix and you get nothing useful, because search there mostly matches titles and names.</p>
-<p>Over the summer I built Seek to fix that for myself. It's a search box for the Netflix catalog where you describe the thing instead of naming it. It seemed to work. Then this fall I came back to it, searched for movies I knew were in the catalog, and a lot of them just didn't show up.</p>
+<p>If you've ever tried to find a movie by describing it, you know how it goes. You remember it was about a chef who loses his restaurant, or two brothers on a road trip, but the name is gone. And since most streaming search runs on keywords, everything you do remember is basically useless.</p>
+<p>Over the summer I built Seek to fix that for myself. It's a search box for the Netflix catalog where you describe the thing instead of naming it, and it worked wonderfully. Not really. This week I came back to it, searched for movies I knew were in the catalog, and a lot of them didn't show up.</p>
 
 <h2>Looking under the hood</h2>
 <p>Seek stores a kind of fingerprint for every title, a long list of numbers that captures what the movie is about, so it can match a description by meaning instead of exact words. That was the whole point of the project.</p>
-<p>When I read through the search code, I found it barely used them. It first grabbed a few hundred titles that shared a word with what you typed, and only then looked at meaning. So if your description didn't happen to use the same words as Netflix's summary, the right movie never even made the shortlist. I had been describing the project as "search by meaning" for months, and it mostly wasn't.</p>
+<p>When I read through the search code, I found it barely used them. It first grabbed a few hundred titles that shared a word with what you typed, and only then looked at meaning. So my fix for keyword search was secretly just more keyword search. If your description didn't happen to use the same words as Netflix's summary, the right movie never made the list.</p>
 
 <h2>Grading a search engine</h2>
-<p>Before fixing anything, I wanted a way to tell if a change actually helped, because "this looks better to me" is how I missed the problem in the first place.</p>
+<p>Before fixing anything, I wanted a way to tell if a change actually helped, because "this looks good to me" is how I missed the problem in the first place.</p>
 <p>So I made a test. I picked 300 titles at random and had an AI describe each one the way a person half remembers it, without the name. One came back as "anime about high school basketball and unrequited love." Then I searched for each description and checked whether the right title came back.</p>
-<p>The AI turned out to be a little too helpful. A lot of its descriptions slipped in a character's name or a word from the title, which basically gives away the answer. I threw those out, 96 of them, and kept the ones you'd have to solve from the plot alone.</p>
-<p>The old version found the right movie in its top 10 only about 1 time in 5.</p>
+<p>The AI turned out to be a little too helpful. A lot of its descriptions slipped in a character's name or a word from the title, which is basically handing over the answer key. I threw those out and kept the ones you'd have to solve from the plot alone.</p>
+<p>The old version found the right movie in its top 10 about 1 time in 5. Only 20%!</p>
 
 <h2>Searching by meaning, for real</h2>
-<p>The fix was to let the database search the fingerprints directly instead of filtering by words first. That one change took it from 1 in 5 to almost 3 in 4, and searches got about five times faster, since the database was doing the work it's built for.</p>
+<p>To fix it, I let the database search the fingerprints directly instead of filtering by words first. That one change took it from 1 in 5 to almost 3 in 4, and searches got about five times faster, since the database was finally doing the job it was built for.</p>
 
 <h2>The part I got wrong</h2>
-<p>My next move seemed obvious. If matching by meaning is good, and matching exact words is good when someone types a title, combining both should be best. I was pretty sure about this one.</p>
+<p>This is where I got a little cocky. If matching by meaning is good, and matching exact words is good when someone types a title, combining both should be best. I was pretty sure about this one.</p>
 <p>It made things worse. Words like "love" and "family" show up in thousands of descriptions, so giving them an equal say pushed the right answer down the list.</p>
-<p>Words do still matter when you type the actual name, though. When I reran the test with people typing exact titles, word matching rescued a bunch of short or unusual titles that the fingerprints fumbled. So the version I kept mostly goes by meaning and gives exact words a small say.</p>
+<p>Words do still matter when you type the actual name, though. When I reran the test with exact titles, word matching rescued a bunch of short or unusual titles that the fingerprints fumbled. So the version I kept mostly goes by meaning and gives exact words a small say.</p>
 <div class="table-wrap"><table>
 <tr><th>Version</th><th>Describe it: right movie in top 10</th><th>Type the name: right movie first</th></tr>
 <tr><td>Before</td><td>20%</td><td>58%</td></tr>
@@ -60,7 +60,7 @@
 
 <h2>What's next</h2>
 <p>My test has a soft spot. The AI wrote its descriptions from the same summaries the fingerprints were made from, which makes matching by meaning look a bit better than it really is. And mood searches like "something funny but not dumb" don't have a single right answer, so they aren't graded at all.</p>
-<p>The real test is real people. Next I want to collect searches from friends, see which ones Seek gets wrong, and go from there.</p>
+<p>The real test is real people. Next I want to collect searches from friends, see which ones Seek gets wrong, and go from there. If it can't find your favorite movie, I want to hear about it.</p>
 <p>The code and the full test results are on <a href="https://github.com/AkhilBod/Seek" target="_blank" rel="noopener">GitHub</a>, and you can try it at <a href="https://tryseek.vercel.app" target="_blank" rel="noopener">tryseek.vercel.app</a>.</p>
             </article>
         </main>
