@@ -36,7 +36,7 @@
 
 <h2>Looking under the hood</h2>
 <p>Seek stores a kind of fingerprint for every title, a long list of numbers that captures what the movie is about, so it can match a description by meaning instead of exact words. That was the whole point of the project.</p>
-<p>When I read through the search code, I found it barely used them. It first grabbed a few hundred titles that shared a word with what you typed, and only then looked at meaning. So my fix for keyword search was secretly just more keyword search. If your description didn't happen to use the same words as Netflix's summary, the right movie never made the list.</p>
+<p>When I read through the search code, I found it barely used them. It first grabbed a few hundred titles that shared a word with what you typed, and only then looked at meaning. So my fix for keyword search was just more keyword searches. If your description didn't happen to use the same words as Netflix's summary, the right movie never made the list.</p>
 
 <h2>Grading a search engine</h2>
 <p>Before fixing anything, I wanted a way to tell if a change actually helped, because "this looks good to me" is how I missed the problem in the first place.</p>
