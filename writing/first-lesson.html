@@ -40,17 +40,18 @@
 <p>That's a lot of homework before you get anything back. Duolingo gives you the reward first and asks for things later. I was doing it backwards, and the dashboard was where people got stuck.</p>
 <p>So I changed where new trials land. Instead of the dashboard, you go straight into a mock interview for the company you said you were targeting. No menu, no choosing. You're answering a question within a minute of starting your trial, which is about as close to "here's your first lesson" as I could get.</p>
 
-<h2>Things I was sure would help</h2>
-<p>I also had a "your trial ends tomorrow" reminder email, because every app has one and it felt responsible. I ran it as an A/B test, with half of trials getting the email and half getting nothing. The two groups converted at basically the same rate, 28.6% and 27.8%. If anything, it just reminded people to cancel, so I turned it off.</p>
-<p>That one stung a little, because I'd have bet money it worked. It's the same lesson I keep relearning: if you don't test it, you're just guessing with extra steps.</p>
+<h2>Making the first question count</h2>
+<p>Getting someone into a mock interview fast only works if the first question feels like it was made for them. Duolingo handles this by asking your level up front, so a beginner doesn't get thrown into the deep end and someone who already knows the basics doesn't get bored.</p>
+<p>My questionnaire was supposed to do the same thing. You told it your target company and role, and it was supposed to pull real questions for that company. When I traced it, the bank of company questions was never actually getting filled. The code to build it existed, but nothing called it. So someone prepping for Google and someone prepping for Stripe were getting pretty much the same questions, right at the moment I most needed them to feel seen.</p>
+<p>Now the bank gets built in the background the second you name your company, so it's ready by the time your first question loads.</p>
 
-<h2>The complaint that turned out to be a bug</h2>
-<p>When people cancel, the app asks why. Price was the top answer, which I expected. Tied with it was "the practice wasn't relevant," and one person wrote that they were looking for questions for a specific company and didn't get them.</p>
-<p>I assumed that was a content problem. It wasn't. The app has a bank of real questions for each company, and when I traced it, nothing in the app was ever filling it. The code to build it existed. Nothing called it. So everyone got generic questions no matter what company they picked, and some of them reasonably decided the app didn't get them. The fix builds the bank in the background as soon as you tell it your target company, and it's almost ready to ship.</p>
+<h2>Asking for less</h2>
+<p>The other thing Duolingo gets right is how little it asks before that first lesson. A handful of taps and you're in. My questionnaire was a lot longer than that, and every extra question is one more chance to close the tab.</p>
+<p>So I'm testing a shorter version against the original. The goal is to find the point where cutting more starts to hurt, where the app knows just enough about you to make that first question land.</p>
 
-<h2>What's next</h2>
-<p>Most of my tests are still too small to call. A side project doesn't get Duolingo's traffic, so a lot of results come back as "probably nothing, check again in two weeks." That's frustrating, but it's better than shipping changes because they feel right.</p>
-<p>The thing I keep coming back to is how much of retention happens in the first five minutes. Duolingo figured that out a long time ago. I'm just now catching up.</p>
+<h2>The number I watch now</h2>
+<p>I used to look at signups. Now the number I care about is how many new trials finish their first mock interview, because everything else follows from that. People who practice once come back. People who stare at a dashboard don't.</p>
+<p>Duolingo figured out the first five minutes a long time ago. I'm building InterviewSense around them now.</p>
             </article>
         </main>
         <footer class="site-footer">
