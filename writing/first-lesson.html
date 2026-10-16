@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="black">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My app made you pay before you could practice | Akhil Bodahanapati</title>
+    <meta name="description" content="What Duolingo's first five minutes taught me about why people quit InterviewSense.">
+    <script>try{if(localStorage.getItem('theme')==='white')document.documentElement.setAttribute('data-theme','white')}catch(e){}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/site.css">
+
+    <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8PGT98XQTN"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-8PGT98XQTN');</script>
+</head>
+<body>
+
+    <div class="page">
+        <header class="site-header">
+            <a class="site-name" href="/">Akhil Bodahanapati</a>
+            <div class="header-right">
+                <nav class="tabs"><a href="/">Home</a><a href="/projects.html">Projects</a><a href="/writing.html" aria-current="page">Writing</a></nav>
+                <div class="theme-switch" role="group" aria-label="Theme">
+                    <button type="button" data-theme="black" aria-pressed="true">black</button>
+                    <button type="button" data-theme="white" aria-pressed="false">white</button>
+                </div>
+            </div>
+        </header>
+        <main>
+            <a class="back" href="/writing.html">&larr; Writing</a>
+            <h1>My app made you pay before you could practice</h1>
+            <div class="meta-line">Oct 2026 · <a class="inline-link" href="https://interviewsense.org" target="_blank" rel="noopener">interviewsense.org</a></div>
+            <article class="prose">
+<p>The first time you open Duolingo, it doesn't ask you to make an account. It asks what language you want, and then it hands you a lesson. You're translating "the apple" into Spanish before it even knows your name. By the time it asks you to sign up, you've already done the thing.</p>
+<p>I didn't think much about that until I looked at my own app.</p>
+<p>InterviewSense is a practice tool for technical interviews. You answer questions out loud, it grades you, and you get better. At least that's the pitch. When I actually dug into the numbers, more than half of the people who started a free trial never ran a single practice session. Most of the people who cancelled did it within an hour of signing up. They signed up, looked around, and left before trying the one thing the app is for.</p>
+
+<h2>The opposite of Duolingo</h2>
+<p>Here's what signing up looked like. You filled out a questionnaire about your target role, hit a paywall, started a trial, and then landed on a dashboard full of options. Behavioral, technical, system design, resume review. Pick one!</p>
+<p>That's a lot of homework before you get anything back. Duolingo gives you the reward first and asks for things later. I was doing it backwards, and the dashboard was where people got stuck.</p>
+<p>So I changed where new trials land. Instead of the dashboard, you go straight into a mock interview for the company you said you were targeting. No menu, no choosing. You're answering a question within a minute of starting your trial, which is about as close to "here's your first lesson" as I could get.</p>
+
+<h2>Things I was sure would help</h2>
+<p>I also had a "your trial ends tomorrow" reminder email, because every app has one and it felt responsible. I ran it as an A/B test, with half of trials getting the email and half getting nothing. The two groups converted at basically the same rate, 28.6% and 27.8%. If anything, it just reminded people to cancel, so I turned it off.</p>
+<p>That one stung a little, because I'd have bet money it worked. It's the same lesson I keep relearning: if you don't test it, you're just guessing with extra steps.</p>
+
+<h2>The complaint that turned out to be a bug</h2>
+<p>When people cancel, the app asks why. Price was the top answer, which I expected. Tied with it was "the practice wasn't relevant," and one person wrote that they were looking for questions for a specific company and didn't get them.</p>
+<p>I assumed that was a content problem. It wasn't. The app has a bank of real questions for each company, and when I traced it, nothing in the app was ever filling it. The code to build it existed. Nothing called it. So everyone got generic questions no matter what company they picked, and some of them reasonably decided the app didn't get them. The fix builds the bank in the background as soon as you tell it your target company, and it's almost ready to ship.</p>
+
+<h2>What's next</h2>
+<p>Most of my tests are still too small to call. A side project doesn't get Duolingo's traffic, so a lot of results come back as "probably nothing, check again in two weeks." That's frustrating, but it's better than shipping changes because they feel right.</p>
+<p>The thing I keep coming back to is how much of retention happens in the first five minutes. Duolingo figured that out a long time ago. I'm just now catching up.</p>
+            </article>
+        </main>
+        <footer class="site-footer">
+            <span>&copy; 2026 Akhil Bodahanapati</span>
+            <nav>
+                <a href="https://github.com/AkhilBod" target="_blank" rel="noopener">GitHub</a>
+                <a href="https://linkedin.com/in/akhil-bod" target="_blank" rel="noopener">LinkedIn</a>
+                <a href="mailto:akkiisan9@gmail.com">Email</a>
+            </nav>
+        </footer>
+    </div>
+    <script src="/site.js"></script>
+
+</body>
+</html>
