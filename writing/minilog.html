@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="black">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What's actually inside a queue | Akhil Bodahanapati</title>
+    <meta name="description" content="Building a small Kafka-style log in Java, and what fsync, crashes, and group commit taught me.">
+    <script>try{if(localStorage.getItem('theme')==='white')document.documentElement.setAttribute('data-theme','white')}catch(e){}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/site.css">
+
+    <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8PGT98XQTN"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-8PGT98XQTN');</script>
+</head>
+<body>
+
+    <div class="page">
+        <header class="site-header">
+            <a class="site-name" href="/">Akhil Bodahanapati</a>
+            <div class="header-right">
+                <nav class="tabs"><a href="/">Home</a><a href="/projects.html">Projects</a><a href="/writing.html" aria-current="page">Writing</a></nav>
+                <div class="theme-switch" role="group" aria-label="Theme">
+                    <button type="button" data-theme="black" aria-pressed="true">black</button>
+                    <button type="button" data-theme="white" aria-pressed="false">white</button>
+                </div>
+            </div>
+        </header>
+        <main>
+            <a class="back" href="/writing.html">&larr; Writing</a>
+            <h1>What's actually inside a queue</h1>
+            <div class="meta-line">Oct 2026 · Java · <a class="inline-link" href="https://github.com/AkhilBod/minilog" target="_blank" rel="noopener">github.com/AkhilBod/minilog</a></div>
+            <article class="prose">
+<p>At the NLP lab last spring, our experiments were slow because every request waited for a database query to finish. The fix was putting a job queue in front of it. Requests went into the queue, workers pulled them out, and turnaround dropped from four minutes to 75 seconds. I was pretty happy with that.</p>
+<p>What I never thought about was the queue itself. I just trusted it. If the machine crashed, did the jobs in it survive? How does it keep up when a bunch of things write to it at once? I had no idea. LinkedIn built Kafka, which is basically the industrial version of that queue, so I figured the best way to find out was to build a small one myself.</p>
+
+<h2>A queue is mostly a file you only add to</h2>
+<p>The core idea is simpler than I expected. You keep a file and only ever add to the end of it. Each message gets a number, called its offset, that goes up by one every time. Readers just remember the last number they read and ask for everything after it. When the file gets big, you start a new one named after its first number, so finding message 1,000,000 means finding the right file and skipping ahead.</p>
+<p>Nothing gets edited, which is what makes the rest of it manageable.</p>
+
+<h2>What a crash leaves behind</h2>
+<p>If the machine dies in the middle of writing a message, the end of the file is garbage: half a message, or a full-looking one with the wrong bytes. So every message also stores a checksum. When the log starts back up, it reads from the beginning and stops at the first message that is cut off or doesn't match its checksum, then chops off everything after it.</p>
+<p>I didn't want to just trust that, so I wrote a test that actually crashes it. It starts a second program that writes as fast as it can and prints each message's number once it's saved. After a second and a half, the test kills it with kill -9, which gives it no chance to clean up. Then it reopens the log and checks that every message the program said was saved is still there and still correct. It passes every time I run it.</p>
+
+<h2>Saving is slow</h2>
+<p>When your program writes to a file, the data usually sits in memory for a while before the computer bothers putting it on the disk. To be sure it's actually saved, you have to call fsync, and on my laptop that takes about 3 milliseconds. Doesn't sound like much. But if you fsync after every message, one writer tops out around 350 messages a second.</p>
+<p>My first idea was to add more threads. I figured eight writers at once would be about eight times faster. It was exactly the same speed: 352 a second. They were all waiting in line for the same lock. And the line wasn't fair. Some threads kept losing the race to get in, and the slowest 1% of writes waited 230 milliseconds. So adding threads made it worse.</p>
+
+<h2>Sharing the fsync</h2>
+<p>The fix is called group commit. Instead of every thread doing its own write and its own fsync, they all hand their messages to one writer thread. That thread grabs everything waiting, writes it all at once, fsyncs once, and then tells every thread its message is saved. Each thread still gets the same promise, it just splits the cost with everyone else who showed up at the same time.</p>
+<div class="table-wrap"><table>
+<tr><th>Setup</th><th>Messages per second</th><th>Slowest 1% of writes</th></tr>
+<tr><td>1 thread, fsync every write</td><td>351</td><td>4.2 ms</td></tr>
+<tr><td>8 threads, fsync every write</td><td>352</td><td>230 ms</td></tr>
+<tr><td>8 threads, group commit</td><td>1,983</td><td>7.3 ms</td></tr>
+<tr><td>32 threads, group commit</td><td>9,730</td><td>7.8 ms</td></tr>
+<tr><td>8 threads, fsync every 50 ms</td><td>446,520</td><td>0.5 ms</td></tr>
+</table></div>
+<p>With 32 threads, group commit is about 28 times faster than doing it one at a time, and every message is still on disk before its writer moves on.</p>
+<p>The last row is the other option: only fsync every 50 milliseconds. That's over a thousand times faster, and the price is that a crash can lose the last 50 milliseconds of messages. From what I read, Kafka leans this way by default and makes up for it by copying every message to other machines, so one crash doesn't lose anything. That was the part I found most interesting.</p>
+
+<h2>What's missing</h2>
+<p>It's one machine and one log. There's no copying to other machines, which is the actual hard part of Kafka. Old files are never cleaned up. And on a Mac, Java's fsync doesn't go all the way down to the disk hardware, so my crash test proves the log survives the program dying, not the power going out.</p>
+<p>Copying to a second machine is what I want to try next, since that's the piece that lets the fast setting be safe.</p>
+<p>The code and the tests are on <a href="https://github.com/AkhilBod/minilog" target="_blank" rel="noopener">GitHub</a>.</p>
+            </article>
+        </main>
+        <footer class="site-footer">
+            <span>&copy; 2026 Akhil Bodahanapati</span>
+            <nav>
+                <a href="https://github.com/AkhilBod" target="_blank" rel="noopener">GitHub</a>
+                <a href="https://linkedin.com/in/akhil-bod" target="_blank" rel="noopener">LinkedIn</a>
+                <a href="mailto:akkiisan9@gmail.com">Email</a>
+            </nav>
+        </footer>
+    </div>
+    <script src="/site.js"></script>
+
+</body>
+</html>
