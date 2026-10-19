@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="black">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three votes, two of them fake | Akhil Bodahanapati</title>
+    <meta name="description" content="Figuring out which crowd labels and labelers to trust when there is no answer key.">
+    <script>try{if(localStorage.getItem('theme')==='white')document.documentElement.setAttribute('data-theme','white')}catch(e){}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/site.css">
+
+    <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8PGT98XQTN"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-8PGT98XQTN');</script>
+</head>
+<body>
+
+    <div class="page">
+        <header class="site-header">
+            <a class="site-name" href="/">Akhil Bodahanapati</a>
+            <div class="header-right">
+                <nav class="tabs"><a href="/">Home</a><a href="/projects.html">Projects</a><a href="/writing.html" aria-current="page">Writing</a></nav>
+                <div class="theme-switch" role="group" aria-label="Theme">
+                    <button type="button" data-theme="black" aria-pressed="true">black</button>
+                    <button type="button" data-theme="white" aria-pressed="false">white</button>
+                </div>
+            </div>
+        </header>
+        <main>
+            <a class="back" href="/writing.html">&larr; Writing</a>
+            <h1>Three votes, two of them fake</h1>
+            <div class="meta-line">Oct 2026 · <a class="inline-link" href="https://github.com/AkhilBod/crowdcheck" target="_blank" rel="noopener">github.com/AkhilBod/crowdcheck</a></div>
+            <article class="prose">
+<p>Last week I needed 300 test questions for my movie search app, so I had an AI write them. Each one was supposed to describe a movie without naming it. A lot of them named it anyway, or slipped in a character's name, which basically gives away the answer. I ended up throwing out 96 of them.</p>
+<p>That got me thinking about what happens when the labels come from thousands of people instead of one AI. Some of them are careful. Some are tired. Some are just clicking to get paid. And usually you don't have an answer key, because if you had one you wouldn't need the labels.</p>
+<p>So how do you figure out who to trust? I built a small version of the problem to find out.</p>
+
+<h2>A fake labeling job</h2>
+<p>I simulated a job with 2,000 tasks, four possible answers each, and 60 workers. Most workers are honest and right somewhere between 65% and 92% of the time. A few are "swappers," who are careful but always mix up two specific answers. The rest are spammers: some pick at random, some pick the same answer every time.</p>
+<p>The spammers are also three times faster than everyone else, because they aren't reading anything. That turned out to matter a lot. When spammers were 20% of the workers, they wrote 42% of the labels.</p>
+
+<h2>Three ways to decide</h2>
+<p>The obvious one is majority vote. Three people label a task, two say "cat," you go with cat.</p>
+<p>The second is what a lot of platforms do: hide a few questions you already know the answer to, grade every worker on those, and trust people more if they got them right. I used 5% of tasks as these test questions.</p>
+<p>The third is an algorithm from 1979 called Dawid-Skene. It doesn't use an answer key at all. It looks at all the labels at once and works out each worker's habits, like "when the answer is A, this person says B about a third of the time," while also working out the answers. Then it goes back and forth between the two until they stop changing.</p>
+
+<h2>What happened</h2>
+<div class="table-wrap"><table>
+<tr><th>Spammers</th><th>Majority vote</th><th>Test questions</th><th>Dawid-Skene</th></tr>
+<tr><td>none</td><td>85.8%</td><td>86.5%</td><td>89.2%</td></tr>
+<tr><td>10% of workers</td><td>73.4%</td><td>79.7%</td><td>82.8%</td></tr>
+<tr><td>20% of workers</td><td>62.6%</td><td>72.4%</td><td>75.7%</td></tr>
+<tr><td>30% of workers</td><td>53.1%</td><td>65.7%</td><td>68.9%</td></tr>
+</table></div>
+<p>That's with three labels per task, averaged over five runs. Majority vote falls apart quickly. Because spammers are fast, two of the three votes on a task are often fake, and two fake votes can easily outvote a real one.</p>
+<p>I expected the test questions to win. You're literally checking people against the right answer, which feels like it should beat an algorithm that never sees one. It didn't. Dawid-Skene came out ahead at every spam level. The test questions only cover 5% of tasks, so you're judging each worker on a handful of answers. Dawid-Skene gets to use every label as evidence about every worker.</p>
+<p>It also caught almost every spammer. Their answers don't depend on the question, so their habits look the same no matter what the right answer is, and that's easy to spot. The few honest workers it wrongly flagged were the weakest ones, around 65% accurate.</p>
+
+<h2>The swappers</h2>
+<p>This was my favorite part. A swapper is wrong in a very consistent way. They see A and say B, every time. Majority vote treats that as noise, and the test questions mark them as bad workers.</p>
+<p>Dawid-Skene just learns the swap. Once it knows "this person says B when they mean A," it flips their answer back, and a consistently wrong worker becomes one of the most useful ones in the pool. I wrote a test for it, and it picks up the swap with over 90% confidence.</p>
+
+<h2>What it doesn't cover</h2>
+<p>The workers are fake, and real ones are messier. They get better with practice, get worse when they're tired, and sometimes copy each other. Every task here is equally hard, and real tasks aren't. Real platforms also choose who sees which task, which changes everything above.</p>
+<p>The next thing I want to try is mixing in AI labelers, since a lot of labeling now has a model as one of the voters. My 96 bad test questions suggest the AI would be an interesting worker to model: really fast and usually right, but wrong in its own specific ways.</p>
+<p>The code and the full results are on <a href="https://github.com/AkhilBod/crowdcheck" target="_blank" rel="noopener">GitHub</a>.</p>
+            </article>
+        </main>
+        <footer class="site-footer">
+            <span>&copy; 2026 Akhil Bodahanapati</span>
+            <nav>
+                <a href="https://github.com/AkhilBod" target="_blank" rel="noopener">GitHub</a>
+                <a href="https://linkedin.com/in/akhil-bod" target="_blank" rel="noopener">LinkedIn</a>
+                <a href="mailto:akkiisan9@gmail.com">Email</a>
+            </nav>
+        </footer>
+    </div>
+    <script src="/site.js"></script>
+
+</body>
+</html>
