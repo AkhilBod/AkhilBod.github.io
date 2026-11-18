@@ -11,7 +11,8 @@
     <style>
     .prose table{font-family:'Inter',system-ui,sans-serif;font-size:15px;line-height:1.45}
     .prose th{font-size:13px}
-    .prose td.n,.prose th.n{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;white-space:nowrap;text-align:right;padding-left:16px;padding-right:0}
+    .prose td.n,.prose th.n{text-align:right;padding-left:16px;padding-right:0}
+    .prose td.n{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;white-space:nowrap}
     .prose td.bad{color:#e07070}
     .prose .note{color:var(--muted);font-size:14px}
     </style>
@@ -47,9 +48,9 @@
 <p>Then a second, smaller model checks the work. It's trained to answer one question: does text A imply text B? For each claim, I ask it whether each cited review implies the claim. If none of them do, the claim gets thrown out. This takes under 2 seconds per listing.</p>
 <p>Here's what that looks like for one house in Dublin, a suburb nowhere near campus:</p>
 <div class="table-wrap"><table>
-<thead><tr><th>What the model said</th><th class="n">Cited reviews that back it up</th></tr></thead>
+<thead><tr><th>What the model said</th><th class="n">Backed up by</th></tr></thead>
 <tbody>
-<tr><td>Great location, close to OSU campus</td><td class="n bad">0 of 13 (thrown out)</td></tr>
+<tr><td>Great location, close to OSU campus</td><td class="n bad">0 of 13, cut</td></tr>
 <tr><td>Clean and well-maintained</td><td class="n">6 of 7</td></tr>
 <tr><td>Spacious, multiple bathrooms, big living room</td><td class="n">2 of 4</td></tr>
 <tr><td>Great coffee setup</td><td class="n">1 of 2</td></tr>
@@ -75,7 +76,7 @@
 <p>The real issue was simpler. The checker was trained on full sentences, and the claims were fragments. "Safe and friendly environment" isn't really a sentence. So I started rewriting every claim as "The reviewer says: safe and friendly environment." before checking it.</p>
 <p>That one change took the example from 0.25 to 0.98. "No air conditioning on hot days" went from 0.44 to 0.96.</p>
 <div class="table-wrap"><table>
-<thead><tr><th>Checker</th><th class="n">Claims thrown out</th><th class="n">Citations that back it up</th></tr></thead>
+<thead><tr><th>Checker</th><th class="n">Claims thrown out</th><th class="n">Citations that check out</th></tr></thead>
 <tbody>
 <tr><td>Claim as written</td><td class="n">7.5%</td><td class="n">45%</td></tr>
 <tr><td>"The reviewer says: ..."</td><td class="n">4.3%</td><td class="n">54%</td></tr>
