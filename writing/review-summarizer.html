@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="black">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checking whether an LLM summary says what its sources say | Akhil Bodahanapati</title>
+    <meta name="description" content="Summarizing Airbnb reviews with a local model, and using an NLI checker to see whether the cited reviews back up each claim.">
+    <script>try{if(localStorage.getItem('theme')==='white')document.documentElement.setAttribute('data-theme','white')}catch(e){}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/site.css">
+    
+    <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8PGT98XQTN"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-8PGT98XQTN');</script>
+</head>
+<body>
+    
+    <div class="page">
+        <header class="site-header">
+            <a class="site-name" href="/">Akhil Bodahanapati</a>
+            <div class="header-right">
+                <nav class="tabs"><a href="/">Home</a><a href="/projects.html">Projects</a><a href="/writing.html" aria-current="page">Writing</a></nav>
+                <div class="theme-switch" role="group" aria-label="Theme">
+                    <button type="button" data-theme="black" aria-pressed="true">black</button>
+                    <button type="button" data-theme="white" aria-pressed="false">white</button>
+                </div>
+            </div>
+        </header>
+        <main>
+            <a class="back" href="/writing.html">&larr; Writing</a>
+            <h1>Checking whether an LLM summary says what its sources say</h1>
+            <div class="meta-line">Nov 2026 · Python, Qwen 2.5 7B, DeBERTa · <a class="inline-link" href="https://github.com/AkhilBod/review-summarizer" target="_blank" rel="noopener">github.com/AkhilBod/review-summarizer</a></div>
+            <article class="prose">
+<p>Review summaries are everywhere now. You open a listing and there's a little paragraph saying guests loved the location and mentioned some street noise. I wanted to know how often a summary like that says something the reviews don't actually say, so I built one and checked it.</p>
+<p>Short version: I made a local model summarize Airbnb reviews and cite which reviews each claim came from. The claims were mostly fine. The citations were not. About half of them pointed at reviews that say nothing about the claim. And the one time I tried to make the prompt better, I accidentally taught the model to say every listing in Columbus was close to Ohio State.</p>
+
+<h2>Setup</h2>
+<p>The data is the public Inside Airbnb dump for Columbus, Ohio: 2,959 listings and 202,113 reviews, scraped in September 2026. I picked 60 random listings with at least 30 reviews and gave the model the 30 most recent for each one. Reviewer names, host names, emails, and phone numbers get replaced before any text reaches a model.</p>
+<p>Everything runs on my laptop, an M3 MacBook with 16 GB of memory. Qwen 2.5 7B through Ollama writes the summary, which takes about 25 to 30 seconds per listing. It has to return at most 5 pros and 3 cons as JSON, and every item has to list the review numbers it came from.</p>
+<p>Then a second, much smaller model checks the work. It's a DeBERTa model trained for natural language inference, which means you give it two pieces of text and it tells you how likely it is that the first one implies the second. For every claim, I score it against each review it cites. A citation counts if the score is at least 0.5, and a claim with zero counting citations gets thrown out. Checking a whole listing takes under two seconds.</p>
+<p>Here's one listing, a house in Dublin, a suburb well northwest of campus:</p>
+<table>
+<thead><tr><th>Claim</th><th>Citations that hold up</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>Great location, close to OSU campus</td><td>0 of 13</td><td>dropped</td></tr>
+<tr><td>Clean and well-maintained interior</td><td>6 of 7</td><td>kept</td></tr>
+<tr><td>Spacious with multiple bathrooms and large living room</td><td>2 of 4</td><td>kept</td></tr>
+<tr><td>Excellent coffee set up for mornings</td><td>1 of 2</td><td>kept</td></tr>
+<tr><td>Great host with good communication and helpfulness</td><td>2 of 6</td><td>kept</td></tr>
+<tr><td>Strict check-in time policy (con)</td><td>1 of 1</td><td>kept</td></tr>
+</tbody>
+</table>
+<p>The OSU one is my fault, and I'll get to it.</p>
+
+<h2>First run</h2>
+<p>The first prompt produced 347 claims, about 6 per listing. Each claim cited 5.4 reviews on average. Nine times the model cited a review number that didn't exist, like review 34 when there were only 30.</p>
+<p>The checker dropped 7.5% of claims, which sounded good. But only 45% of citations held up. So the typical claim was something true, like "the host was responsive", with five reviews attached where two said it and three were just positive reviews about something else.</p>
+<p>Before trusting the 7.5%, I read through 20 of the dropped claims next to the reviews they cited. Around 5 were made up, like "comfortable beds and cozy atmosphere" for a listing where nobody mentioned the beds. Another 5 were two things joined with "and" where only one half was true, like "spacious and well-decorated" when the reviews only said spacious. And about 10 were completely fine. The checker was just wrong.</p>
+<p>The clearest one: the model wrote "Safe and friendly environment". The review it cited was literally "Safe and friendly environment" followed by "Would recommend highly". The checker gave it 0.25.</p>
+
+<h2>Fixing the checker</h2>
+<p>My first guess was that reviews were too long and messy, so I split each review into sentences and scored each one separately. That made it worse. Drops went from 8% to 22%, because a claim like "clean and close to downtown" usually gets its two halves from two different sentences, and no single sentence implies both.</p>
+<p>The actual problem was smaller. NLI models are trained on full sentences, and the claims were fragments. "Safe and friendly environment" isn't really a statement about anything. So before scoring, I started wrapping each claim as "The reviewer says: safe and friendly environment." That one example went from 0.25 to 0.98. "No air conditioning on hot days" went from 0.44 to 0.96.</p>
+<table>
+<thead><tr><th>Checker</th><th>Claims dropped</th><th>Citations that hold up</th><th>Single-fact claims dropped</th></tr></thead>
+<tbody>
+<tr><td>Raw claim</td><td>7.5%</td><td>45.3%</td><td>5.5%</td></tr>
+<tr><td>"The reviewer says: ..."</td><td>4.3%</td><td>53.7%</td><td>0.8%</td></tr>
+</tbody>
+</table>
+<p>It's not free. I read 18 citations that flipped from rejected to accepted, and about 13 were right. The other 5 were the checker being too generous, like accepting "spacious and well-appointed home" from a review that only talks about the location and the mattress. So the fix trades a lot of wrong drops for a smaller number of wrong accepts. I think that's the better side to be wrong on for citations, but not for claims, since a claim that should've been dropped ends up on the page.</p>
+<p>One thing the fix didn't change: 63% of claims were two things joined with "and" or "or", and that's where almost all the remaining drops were.</p>
+
+<h2>Fixing the prompt, badly</h2>
+<p>So I added two rules to the prompt. One fact per claim, no joining things with "and". And use the guests' own words, and I gave an example: say "close to OSU campus", not "great location".</p>
+<p>Joined claims went from 63% to 49%, which isn't great for a rule I stated pretty directly. But the bigger change was the example. In the first run, 4 claims mentioned OSU. In the second run, 31 did. In 11 of those, no review for that listing mentions OSU or campus at all. The model wasn't using the guests' words. It was using mine.</p>
+<p>The checker caught 8 of those 11 and let 3 through. Leaving the OSU claims out, the second prompt did a little better than the first: 57.6% of citations held up instead of 53.9%, and 3.9% of claims were dropped instead of 4.4%. Small, and on 60 listings I wouldn't call it a real difference.</p>
+<p>I'm keeping the OSU thing as the main thing I learned from this. The checker was built to catch the model making things up. The first real batch of made-up claims it caught came from my own prompt.</p>
+
+<h2>Not redoing work</h2>
+<p>Each listing's summary is saved with a hash of the review IDs it was built from, and a run skips any listing whose set hasn't changed. To see how much that saves, I compared the data as of August 25 with September 25. Over that month, 1,343 of 2,557 listings got at least one new review, so 52.5% would need a new summary. Over a single week, it was 507 of 2,605, or 19.5%. Weekly refreshes skip about four of every five listings.</p>
+
+<h2>What I'd change</h2>
+<p>The biggest gap is that my hand checks were me reading about 40 examples. That was enough to find the fragment problem and the OSU leak, but not enough to trust any percentage to the decimal. A real version needs a few hundred claims labeled by a couple of people, and the 0.5 threshold should be picked from that instead of guessed.</p>
+<p>I'd also stop showing every citation the model gives. The checker already knows which ones hold up, so the summary should only link to those. And I'd split joined claims into separate ones before checking, since asking the model nicely clearly didn't do it.</p>
+<p>Next I want to try the same thing with a bigger model and see whether the citation problem goes away or just gets harder to catch.</p>
+<p>The code is on <a href="https://github.com/AkhilBod/review-summarizer" target="_blank" rel="noopener">GitHub</a>. It runs fully offline once Ollama and the NLI model are downloaded.</p>
+            </article>
+        </main>
+        <footer class="site-footer">
+            <span>&copy; 2026 Akhil Bodahanapati</span>
+            <nav>
+                <a href="https://github.com/AkhilBod" target="_blank" rel="noopener">GitHub</a>
+                <a href="https://linkedin.com/in/akhil-bod" target="_blank" rel="noopener">LinkedIn</a>
+                <a href="mailto:akkiisan9@gmail.com">Email</a>
+            </nav>
+        </footer>
+    </div>
+    <script src="/site.js"></script>
+    
+</body>
+</html>
